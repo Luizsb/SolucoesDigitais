@@ -1,14 +1,11 @@
 # Portfólio de Soluções Digitais
 
-Interações Digitais Arco — resolução de problemas, automatizações, soluções e ferramentas para simplificar o dia a dia.
+Página em **português (pt-BR)** que apresenta o portfólio de iniciativas digitais da equipe **Interações Digitais Arco**.
 
-## GitHub Pages
+O foco é dar visibilidade a soluções, automatizações, ferramentas e experimentos que:
 
-Para publicar no GitHub Pages:
+- simplificam o dia a dia operacional;
+- aumentam a qualidade e a padronização;
+- reduzem custos e retrabalho.
 
-1. No repositório [Luizsb/SolucoesDigitais](https://github.com/Luizsb/SolucoesDigitais), vá em **Settings** → **Pages**.
-2. Em **Source**, escolha **Deploy from a branch**.
-3. Em **Branch**, selecione **main** e pasta **/ (root)**.
-4. Clique em **Save**.
-
-O site ficará disponível em: **https://luizsb.github.io/SolucoesDigitais/**
+Trata-se de uma **single page application (SPA) em React + Tailwind CSS**, construída diretamente em um único arquivo `index.html` para facilitar demonstrações rápidas e compartilhamento interno.
