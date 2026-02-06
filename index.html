@@ -1208,24 +1208,19 @@ root.render(/*#__PURE__*/React.createElement(App, null));
             );
         };
 
+        const getInitialTheme = () => {
+            try {
+                const stored = window.localStorage.getItem("theme");
+                if (stored === "light" || stored === "dark") return stored;
+                if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+            } catch {}
+            return "light";
+        };
+
         const App = () => {
             const [filter, setFilter] = useState("Todos");
             const [filteredProjects, setFilteredProjects] = useState(projectsData);
-            const [theme, setTheme] = useState("light");
-
-            useEffect(() => {
-                try {
-                    const stored = window.localStorage.getItem("theme");
-                    if (stored === "light" || stored === "dark") {
-                        setTheme(stored);
-                        return;
-                    }
-                    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-                    setTheme(prefersDark ? "dark" : "light");
-                } catch {
-                    setTheme("light");
-                }
-            }, []);
+            const [theme, setTheme] = useState(getInitialTheme);
 
             useEffect(() => {
                 if (typeof document !== "undefined") {
