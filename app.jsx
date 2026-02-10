@@ -50,10 +50,11 @@ const RAW_PROJECTS = [
         ],
         type: "Automação / IA",
         problem: "Alto custo e tempo na terceirização de roteiros.",
-        description: "IA que gera briefings e roteiros pedagógicos consistentes em segundos, integrando orientações e BNCC.",
+        description: "IA que gera briefings e roteiros pedagógicos consistentes em segundos, integrando orientações e BNCC (requer uma chave API configurada).",
         benefit: "Redução de 2 semanas para 1h. Saving de ~R$15k/coleção.",
         status: "Em uso",
-        icon: "Brain"
+        icon: "Brain",
+        link: "https://beamish-genie-625c30.netlify.app/"
     },
     { 
         title: "Acervo Digital",
@@ -110,7 +111,8 @@ const RAW_PROJECTS = [
     { 
         title: "Divisor Automático PDFs",
         owners: [
-            { name: "Luiz Donin", url: "https://arco.enterprise.slack.com/team/U09KKDE7740" }
+            { name: "Luiz Donin", url: "https://arco.enterprise.slack.com/team/U09KKDE7740" },
+            { name: "Mariana Michels", url: "https://arco.enterprise.slack.com/team/U07PN0PFKMK" }
         ],
         type: "Automação / Script",
         problem: "Processo manual e lento de divisão de arquivos.",
@@ -355,9 +357,16 @@ const App = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div>
-                            <h1 className={`text-3xl md:text-4xl font-bold tracking-tight mb-2 ${isDark ? "text-slate-50" : "text-gray-900"}`}>
-                                Portfólio de Soluções Digitais
-                            </h1>
+                            <div className="flex items-center gap-3 mb-2">
+                                <img
+                                    src="favicon.svg"
+                                    alt="Logo Portfólio de Soluções Digitais"
+                                    className="w-9 h-9 rounded-xl shadow-sm"
+                                />
+                                <h1 className={`text-3xl md:text-4xl font-bold tracking-tight ${isDark ? "text-slate-50" : "text-gray-900"}`}>
+                                    Portfólio de Soluções Digitais
+                                </h1>
+                            </div>
                             <p className={`text-lg max-w-2xl ${isDark ? "text-slate-300" : "text-gray-600"}`}>
                                 <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>Soluções para problemas do dia a dia</span>,{" "}
                                 <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>automatizações</span> e{" "}
