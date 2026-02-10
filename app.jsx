@@ -66,8 +66,9 @@ const RAW_PROJECTS = [
         problem: "Desorganização de conteúdos em planilhas dispersas.",
         description: "Plataforma unificada com busca inteligente e filtros para consulta de ODAs e audiovisuais.",
         benefit: "Escala na organização e agilidade na busca.",
-        status: "Produção",
-        icon: "Database"
+        status: "Em desenvolvimento",
+        icon: "Database",
+        link: "https://acervo-digital-frontend.onrender.com/"
     },
     { 
         title: "Gerenciador RA (WebAR)",
@@ -103,10 +104,11 @@ const RAW_PROJECTS = [
         ],
         type: "Produto Digital",
         problem: "Materiais limitados ao PDF estático.",
-        description: "Livro responsivo com redação online e gravação, feito com auxílio de IA.",
+        description: "Livro responsivo com redação online e gravação, feito com auxílio de IA, da Conquista.",
         benefit: "Inclusão digital do aluno e produção 100% interna.",
-        status: "Produção",
-        icon: "BookOpen"
+        status: "Em uso",
+        icon: "BookOpen",
+        link: "https://digital.solucaoconquista.com.br/LDS/2026/AF/6Ano/PRODTEXTO/CQT_2026_AF_V1_POR_PF_6ANO/"
     },
     { 
         title: "Divisor Automático PDFs",
@@ -114,7 +116,7 @@ const RAW_PROJECTS = [
             { name: "Luiz Donin", url: "https://arco.enterprise.slack.com/team/U09KKDE7740" },
             { name: "Mariana Michels", url: "https://arco.enterprise.slack.com/team/U07PN0PFKMK" }
         ],
-        type: "Automação / Script",
+        type: "Ferramenta / Automação",
         problem: "Processo manual e lento de divisão de arquivos.",
         description: "Automatiza a divisão de capítulos, remove marcas de corte e padroniza nomenclatura.",
         benefit: "Arquivos finais mais leves e sem erros.",
@@ -332,7 +334,7 @@ const App = () => {
         } catch {}
     }, [theme]);
 
-    const statusOptions = ["Todos", "Em uso", "Produção", "Em desenvolvimento", "Piloto"];
+    const statusOptions = ["Todos", "Em uso", "Em desenvolvimento", "Piloto"];
 
     useEffect(() => {
         if (filter === "Todos") {
@@ -344,7 +346,7 @@ const App = () => {
 
     const stats = {
         total: projectsData.length,
-        emUso: projectsData.filter(p => p.status === "Em uso" || p.status === "Produção").length,
+        emUso: projectsData.filter(p => p.status === "Em uso").length,
         emDev: projectsData.filter(p => p.status === "Em desenvolvimento" || p.status === "Piloto").length
     };
 
@@ -361,7 +363,7 @@ const App = () => {
                                 <img
                                     src="favicon.svg"
                                     alt="Logo Portfólio de Soluções Digitais"
-                                    className="w-9 h-9 rounded-xl shadow-sm"
+                                    className="w-11 h-11 rounded-2xl shadow-sm"
                                 />
                                 <h1 className={`text-3xl md:text-4xl font-bold tracking-tight ${isDark ? "text-slate-50" : "text-gray-900"}`}>
                                     Portfólio de Soluções Digitais
@@ -408,7 +410,7 @@ const App = () => {
                                 </div>
                                 <div className={`rounded-lg p-4 text-center border ${isDark ? "bg-emerald-900/40 border-emerald-700" : "bg-green-50 border-green-100"}`}>
                                     <div className={`text-2xl font-bold ${isDark ? "text-emerald-300" : "text-green-700"}`}>{stats.emUso}</div>
-                                    <div className={`text-xs font-medium uppercase ${isDark ? "text-emerald-300" : "text-green-600"}`}>Em Uso / Prod</div>
+                                    <div className={`text-xs font-medium uppercase ${isDark ? "text-emerald-300" : "text-green-600"}`}>Em uso</div>
                                 </div>
                                 <div className={`rounded-lg p-4 text-center border ${isDark ? "bg-blue-900/40 border-blue-700" : "bg-blue-50 border-blue-100"}`}>
                                     <div className={`text-2xl font-bold ${isDark ? "text-blue-300" : "text-blue-700"}`}>{stats.emDev}</div>
