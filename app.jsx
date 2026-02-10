@@ -234,6 +234,79 @@ const StatusBadge = ({ status }) => {
     );
 };
 
+const ProjectCard = ({ project, isDark }) => {
+    const IconComponent = project.icon;
+
+    return (
+        <div
+            className={`rounded-xl border p-6 flex flex-col h-full card-hover transition-all-custom ${isDark ? "bg-slate-900 border-slate-700" : "bg-white border-gray-200"}`}
+        >
+            <div className="flex justify-between items-start mb-4">
+                <div className={`p-3 rounded-lg ${isDark ? "text-sky-400 bg-sky-500/10" : "text-indigo-600 bg-indigo-50"}`}>
+                    <IconComponent size={24} />
+                </div>
+                <StatusBadge status={project.status} />
+            </div>
+            
+            <div className={`mb-1 text-xs font-semibold uppercase tracking-wide ${isDark ? "text-sky-400" : "text-indigo-600"}`}>
+                {project.type}
+            </div>
+
+            <div className={`mb-1 text-xs ${isDark ? "text-slate-400" : "text-gray-500"}`}>
+                Responsável:{" "}
+                {project.owners && project.owners.length > 0 ? (
+                    <span className="font-medium">
+                        {project.owners.map((owner, idx) => (
+                            <a
+                                key={owner.name}
+                                href={owner.url}
+                                target="_blank"
+                                className={isDark ? "text-sky-300 hover:underline" : "text-sky-700 hover:underline"}
+                            >
+                                {idx > 0 ? `, ${owner.name}` : owner.name}
+                            </a>
+                        ))}
+                    </span>
+                ) : (
+                    <span className="font-medium">{project.owner}</span>
+                )}
+            </div>
+            
+            <h3 className={`text-xl font-bold mb-2 ${isDark ? "text-slate-50" : "text-gray-900"}`}>
+                {project.title}
+            </h3>
+            
+            <p className={`text-sm mb-4 line-clamp-3 ${isDark ? "text-slate-300" : "text-gray-600"}`}>
+                {project.description}
+            </p>
+            
+            <div className={`mt-auto pt-4 border-t ${isDark ? "border-slate-700" : "border-gray-100"}`}>
+                <div className="mb-4">
+                    <span className={`text-xs font-bold uppercase block mb-1 ${isDark ? "text-slate-400" : "text-gray-400"}`}>Impacto Principal</span>
+                    <p className={`text-sm font-medium ${isDark ? "text-slate-100" : "text-gray-800"}`}>{project.benefit}</p>
+                </div>
+                
+                {project.link ? (
+                    <a 
+                        href={project.link} 
+                        target="_blank" 
+                        className={`w-full flex items-center justify-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${isDark ? "border-sky-500 text-sky-300 hover:bg-sky-500/10" : "border-sky-600 text-sky-600 hover:bg-sky-50"}`}
+                    >
+                        {project.status === "Em uso" ? "Acessar" : "Ver Demo / Link"} <ExternalLink size={16} className="ml-2" />
+                    </a>
+                ) : (
+                    <button 
+                        disabled 
+                        className={`w-full flex items-center justify-center px-4 py-2 border rounded-lg text-sm font-medium cursor-not-allowed ${isDark ? "border-slate-700 text-slate-500 bg-slate-800" : "border-gray-200 text-gray-400 bg-gray-50"}`}
+                    >
+                        Acesso Interno
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const getInitialTheme = () => {
     try {
         const stored = window.localStorage.getItem("theme");
@@ -286,22 +359,39 @@ const App = () => {
                                 Portfólio de Soluções Digitais
                             </h1>
                             <p className={`text-lg max-w-2xl ${isDark ? "text-slate-300" : "text-gray-600"}`}>
-                                <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>Resolução de problemas</span>,{" "}
-                                <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>automatizações</span>,{" "}
-                                <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>soluções</span> e{" "}
-                                <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>ferramentas</span> para simplificar o dia a dia.
+                                <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>Soluções para problemas do dia a dia</span>,{" "}
+                                <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>automatizações</span> e{" "}
+                                <span className={`${isDark ? "text-sky-400" : "text-indigo-600"} font-semibold`}>ferramentas</span> que simplificam o trabalho.
                             </p>
                         </div>
                         <div className="mt-6 md:mt-0 flex flex-col items-end gap-4">
-                            <button
-                                type="button"
-                                onClick={() => setTheme(isDark ? "light" : "dark")}
-                                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all-custom focus:outline-none focus:ring-2 focus:ring-offset-2 ${isDark ? "bg-slate-800 border-slate-600 text-slate-100 focus:ring-sky-500 focus:ring-offset-slate-900" : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-sky-500 focus:ring-offset-gray-100"}`}
-                                aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
-                            >
-                                {isDark ? <Sun size={16} /> : <Moon size={16} />}
-                                <span>Modo {isDark ? "claro" : "escuro"}</span>
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    disabled
+                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border cursor-not-allowed opacity-60 ${
+                                        isDark
+                                            ? "bg-slate-800 border-slate-700 text-slate-300"
+                                            : "bg-white border-gray-300 text-gray-500"
+                                    }`}
+                                    title="Em breve: cadastro de novas soluções"
+                                >
+                                    + Cadastrar nova solução
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setTheme(isDark ? "light" : "dark")}
+                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all-custom focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                        isDark
+                                            ? "bg-slate-800 border-slate-600 text-slate-100 focus:ring-sky-500 focus:ring-offset-slate-900"
+                                            : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 focus:ring-sky-500 focus:ring-offset-gray-100"
+                                    }`}
+                                    aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+                                >
+                                    {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                                    <span>Modo {isDark ? "claro" : "escuro"}</span>
+                                </button>
+                            </div>
                             <div className="flex gap-4">
                                 <div className={`rounded-lg p-4 text-center border ${isDark ? "bg-slate-900 border-slate-700" : "bg-gray-50 border-gray-100"}`}>
                                     <div className={`text-2xl font-bold ${isDark ? "text-slate-50" : "text-gray-900"}`}>{stats.total}</div>
