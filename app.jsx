@@ -208,7 +208,7 @@ const RAW_PROJECTS = [
         problem: "Alunos usam mapas mentais para estudar para provas, mas hoje não há uma forma escalável de gerar esses materiais a partir dos conteúdos.",
         description: "Gerador de mapas mentais com resumo de cada capítulo, usando IA para criar mapas automaticamente a partir dos conteúdos.",
         benefit: "Gera mapas mentais em escala para apoiar revisão de capítulos por alunos e professores.",
-        status: "Piloto",
+        status: "Em desenvolvimento",
         icon: "Brain"
     }
 ];
@@ -347,7 +347,7 @@ const App = () => {
         } catch {}
     }, [theme]);
 
-    const statusOptions = ["Todos", "Em uso", "Em desenvolvimento", "Piloto"];
+    const statusOptions = ["Todos", "Em uso", "Piloto", "Em desenvolvimento"];
 
     useEffect(() => {
         if (filter === "Todos") {
@@ -442,7 +442,16 @@ const App = () => {
                         <Filter size={18} className="mr-1" />
                         <span className="text-sm font-medium">Filtrar por status:</span>
                     </div>
-                    {statusOptions.map(option => (
+                    {statusOptions.map(option => {
+                        const help =
+                            option === "Em uso"
+                                ? "Já implantada e sendo utilizada em rotina."
+                                : option === "Piloto"
+                                ? "Em teste controlado com grupo menor, perto de ir para uso amplo."
+                                : option === "Em desenvolvimento"
+                                ? "Em construção ou validação inicial; ainda sem piloto ativo."
+                                : undefined;
+                        return (
                         <button
                             key={option}
                             onClick={() => setFilter(option)}
@@ -451,10 +460,11 @@ const App = () => {
                                 ? (isDark ? 'bg-white text-gray-900 shadow-md' : 'bg-gray-900 text-white shadow-md')
                                 : (isDark ? 'bg-slate-800 text-slate-200 border border-slate-600 hover:bg-slate-700' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200')
                             }`}
+                            title={help}
                         >
                             {option}
                         </button>
-                    ))}
+                    )})}
                 </div>
 
                 {/* Grid de Projetos */}
