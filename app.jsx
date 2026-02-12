@@ -159,7 +159,8 @@ const RAW_PROJECTS = [
         description: "Ferramenta visual unificada para produção de livros digitais independente da marca.",
         benefit: "Escalabilidade e padronização multimarcas.",
         status: "Em desenvolvimento",
-        icon: "Wrench"
+        icon: "Wrench",
+        link: "https://drive.google.com/file/d/1Mr0yz_gA_nUh2cqpuBFUCOYjwUtCh4R8/view?resourcekey"
     },
     { 
         title: "Dash Controle Produção",
@@ -197,6 +198,18 @@ const RAW_PROJECTS = [
         benefit: "Segurança e organização no trânsito de arquivos.",
         status: "Piloto",
         icon: "FolderGit2"
+    },
+    { 
+        title: "Ferramenta de mapa mental",
+        owners: [
+            { name: "Diego Renan", url: "https://arco.enterprise.slack.com/team/U056X5J6UFM" }
+        ],
+        type: "Ferramenta / IA",
+        problem: "Alunos usam mapas mentais para estudar para provas, mas hoje não há uma forma escalável de gerar esses materiais a partir dos conteúdos.",
+        description: "Gerador de mapas mentais com resumo de cada capítulo, usando IA para criar mapas automaticamente a partir dos conteúdos.",
+        benefit: "Gera mapas mentais em escala para apoiar revisão de capítulos por alunos e professores.",
+        status: "Piloto",
+        icon: "Brain"
     }
 ];
 
