@@ -140,6 +140,115 @@ export default function App() {
     setSearchQuery('');
   };
 
+  const renderFilters = (showViewModeToggle: boolean) => (
+    <div className="flex flex-wrap items-center gap-4 bg-surface-container/50 p-2 rounded-2xl">
+      <div className="flex items-center p-1 bg-surface-container-low rounded-xl">
+        {[
+          { id: 'Todos', label: 'Todos' },
+          { id: 'Em uso', label: 'Em uso' },
+          { id: 'Em desenvolvimento', label: 'Em desenvolvimento' },
+          { id: 'Piloto', label: 'Piloto' },
+        ].map((filter) => (
+          <button
+            key={filter.id}
+            type="button"
+            onClick={() => setActiveFilter(filter.id)}
+            className={`px-4 py-2 rounded-lg text-sm transition-all whitespace-nowrap ${
+              activeFilter === filter.id
+                ? 'font-semibold bg-primary text-on-primary-container shadow-lg'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="relative group min-w-[140px]">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="w-full appearance-none bg-surface-container-high border border-outline-variant/20 rounded-lg px-4 py-2 pr-10 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat === 'Todas' ? 'Todas Categorias' : cat}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant"
+            size={16}
+          />
+        </div>
+
+        <div className="relative group min-w-[140px]">
+          <select
+            value={responsibleFilter}
+            onChange={(e) => setResponsibleFilter(e.target.value)}
+            className="w-full appearance-none bg-surface-container-high border border-outline-variant/20 rounded-lg px-4 py-2 pr-10 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+          >
+            {responsibles.map((resp) => (
+              <option key={resp} value={resp}>
+                {resp === 'Todos' ? 'Todos Responsáveis' : resp}
+              </option>
+            ))}
+          </select>
+          <User
+            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant"
+            size={16}
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={clearFilters}
+          disabled={!hasActiveFilters}
+          className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all border ${
+            hasActiveFilters
+              ? 'border-outline-variant/30 text-on-surface hover:border-primary/50 hover:text-primary'
+              : 'border-outline-variant/10 text-on-surface-variant/60 cursor-not-allowed'
+          }`}
+          title="Limpar filtros aplicados"
+        >
+          Limpar filtros
+        </button>
+      </div>
+
+      {showViewModeToggle && (
+        <div className="flex items-center gap-3 ml-auto">
+          <div className="h-8 w-px bg-outline-variant/20 mx-1" />
+
+          <div className="flex items-center bg-surface-container-high rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-md transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-surface-container-highest text-primary'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <Grid size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md transition-all ${
+                viewMode === 'list'
+                  ? 'bg-surface-container-highest text-primary'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              <ListIcon size={20} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex flex-col">
       <TopNavBar
@@ -236,110 +345,7 @@ export default function App() {
                       Nenhuma solução disponível na planilha no momento.
                     </div>
                   )}
-                  <div className="flex flex-wrap items-center gap-4 bg-surface-container/50 p-2 rounded-2xl">
-                    <div className="flex items-center p-1 bg-surface-container-low rounded-xl">
-                      {[
-                        { id: 'Todos', label: 'Todos' },
-                        { id: 'Em uso', label: 'Em uso' },
-                        { id: 'Em desenvolvimento', label: 'Em desenvolvimento' },
-                        { id: 'Piloto', label: 'Piloto' },
-                      ].map((filter) => (
-                        <button
-                          key={filter.id}
-                          type="button"
-                          onClick={() => setActiveFilter(filter.id)}
-                          className={`px-4 py-2 rounded-lg text-sm transition-all whitespace-nowrap ${
-                            activeFilter === filter.id
-                              ? 'font-semibold bg-primary text-on-primary-container shadow-lg'
-                              : 'text-on-surface-variant hover:text-on-surface'
-                          }`}
-                        >
-                          {filter.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="relative group min-w-[140px]">
-                        <select
-                          value={categoryFilter}
-                          onChange={(e) => setCategoryFilter(e.target.value)}
-                          className="w-full appearance-none bg-surface-container-high border border-outline-variant/20 rounded-lg px-4 py-2 pr-10 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-                        >
-                          {categories.map((cat) => (
-                            <option key={cat} value={cat}>
-                              {cat === 'Todas' ? 'Todas Categorias' : cat}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown
-                          className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant"
-                          size={16}
-                        />
-                      </div>
-
-                      <div className="relative group min-w-[140px]">
-                        <select
-                          value={responsibleFilter}
-                          onChange={(e) => setResponsibleFilter(e.target.value)}
-                          className="w-full appearance-none bg-surface-container-high border border-outline-variant/20 rounded-lg px-4 py-2 pr-10 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-                        >
-                          {responsibles.map((resp) => (
-                            <option key={resp} value={resp}>
-                              {resp === 'Todos' ? 'Todos Responsáveis' : resp}
-                            </option>
-                          ))}
-                        </select>
-                        <User
-                          className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant"
-                          size={16}
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={clearFilters}
-                        disabled={!hasActiveFilters}
-                        className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all border ${
-                          hasActiveFilters
-                            ? 'border-outline-variant/30 text-on-surface hover:border-primary/50 hover:text-primary'
-                            : 'border-outline-variant/10 text-on-surface-variant/60 cursor-not-allowed'
-                        }`}
-                        title="Limpar filtros aplicados"
-                      >
-                        Limpar filtros
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-3 ml-auto">
-                      <div className="h-8 w-px bg-outline-variant/20 mx-1" />
-
-                      <div className="flex items-center bg-surface-container-high rounded-lg p-1">
-                        <button
-                          type="button"
-                          onClick={() => setViewMode('grid')}
-                          className={`p-1.5 rounded-md transition-all ${
-                            viewMode === 'grid'
-                              ? 'bg-surface-container-highest text-primary'
-                              : 'text-on-surface-variant hover:text-on-surface'
-                          }`}
-                        >
-                          <Grid size={20} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setViewMode('list')}
-                          className={`p-1.5 rounded-md transition-all ${
-                            viewMode === 'list'
-                              ? 'bg-surface-container-highest text-primary'
-                              : 'text-on-surface-variant hover:text-on-surface'
-                          }`}
-                        >
-                          <ListIcon size={20} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  {renderFilters(true)}
 
                   <AnimatePresence mode="wait">
                     {viewMode === 'grid' ? (
@@ -433,7 +439,7 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <SolutionsCatalog solutions={solutions} />
+              <SolutionsCatalog solutions={filteredSolutions} filtersSlot={renderFilters(false)} />
             </motion.div>
           )}
 

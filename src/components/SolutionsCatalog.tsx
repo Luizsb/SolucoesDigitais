@@ -7,9 +7,10 @@ import type { Solution } from '../types/solution';
 
 type SolutionsCatalogProps = {
   solutions: Solution[];
+  filtersSlot?: React.ReactNode;
 };
 
-export function SolutionsCatalog({ solutions }: SolutionsCatalogProps) {
+export function SolutionsCatalog({ solutions, filtersSlot }: SolutionsCatalogProps) {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -20,6 +21,8 @@ export function SolutionsCatalog({ solutions }: SolutionsCatalogProps) {
           </p>
         </div>
       </div>
+
+      {filtersSlot}
 
       <div className="grid grid-cols-1 gap-4">
         {solutions.map((s) => (
