@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-label="Genius Support">
+  <defs>
+    <linearGradient id="a" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#004d69"/>
+      <stop offset="100%" stop-color="#00668b"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#a)"/>
+  <text x="400" y="215" text-anchor="middle" fill="#c2e8ff" font-family="system-ui,sans-serif" font-size="14" font-weight="600" letter-spacing="0.2em">ATENDIMENTO</text>
+  <text x="400" y="265" text-anchor="middle" fill="#ffffff" font-family="system-ui,sans-serif" font-size="36" font-weight="700">Genius Support</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-label="Automa��o Contratual">
+  <defs>
+    <linearGradient id="a" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6b3d00"/>
+      <stop offset="100%" stop-color="#b86b12"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#a)"/>
+  <text x="400" y="215" text-anchor="middle" fill="#ffe8cc" font-family="system-ui,sans-serif" font-size="14" font-weight="600" letter-spacing="0.2em">JUR�DICO</text>
+  <text x="400" y="255" text-anchor="middle" fill="#ffffff" font-family="system-ui,sans-serif" font-size="30" font-weight="700">Automa��o</text>
+  <text x="400" y="290" text-anchor="middle" fill="#ffffff" font-family="system-ui,sans-serif" font-size="30" font-weight="700">Contratual</text>
+</svg>
