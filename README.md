@@ -1,4 +1,4 @@
-# Portfólio de Soluções Digitais
+﻿# Portfólio de Soluções Digitais
 
 Plataforma interna para organizar, divulgar e consultar soluções digitais do time em um catálogo único, com foco em reutilização, visibilidade e impacto operacional.
 
