@@ -13,13 +13,16 @@ import {
 import { STATUS_BADGE_CLASSES } from '../lib/statusStyles';
 import { getSolutionCta } from '../lib/solutionCta';
 import type { Solution } from '../types/solution';
+import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
+import { ResponsibleNames } from './ResponsibleNames';
 
 type SolutionModalProps = {
   solution: Solution;
   onClose: () => void;
+  responsibleLinks: ResponsibleLinksMap;
 };
 
-export function SolutionModal({ solution, onClose }: SolutionModalProps) {
+export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionModalProps) {
   const cta = getSolutionCta(solution);
 
   return (
@@ -61,15 +64,21 @@ export function SolutionModal({ solution, onClose }: SolutionModalProps) {
         </div>
 
         <div className="flex-grow p-6 md:p-10 overflow-y-auto custom-scrollbar">
-          <div className="flex items-center justify-between mb-8">
+          <div className="mb-8 flex flex-col items-start gap-3 pr-14">
             <span
-              className={`px-4 py-1.5 rounded-full text-xs font-bold font-label uppercase tracking-widest ${STATUS_BADGE_CLASSES[solution.status]}`}
+              className={`inline-flex shrink-0 px-4 py-1.5 rounded-full text-xs font-bold font-label uppercase tracking-widest ${STATUS_BADGE_CLASSES[solution.status]}`}
             >
               {solution.status}
             </span>
-            <div className="flex items-center gap-2 text-on-surface-variant">
-              <User size={16} />
-              <span className="text-sm font-medium">Responsável: {solution.responsible}</span>
+            <div className="flex min-w-0 items-start gap-2 text-on-surface-variant">
+              <User size={16} className="mt-0.5 shrink-0" />
+              <span className="text-sm font-medium leading-snug break-words">
+                Responsável:{' '}
+                <ResponsibleNames
+                  responsible={solution.responsible}
+                  responsibleLinks={responsibleLinks}
+                />
+              </span>
             </div>
           </div>
 

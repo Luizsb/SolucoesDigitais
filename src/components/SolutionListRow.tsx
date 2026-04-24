@@ -5,13 +5,20 @@ import { User } from 'lucide-react';
 import { STATUS_BADGE_CLASSES } from '../lib/statusStyles';
 import { getSolutionCta } from '../lib/solutionCta';
 import type { Solution } from '../types/solution';
+import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
+import { ResponsibleNames } from './ResponsibleNames';
 
 type SolutionListRowProps = {
   solution: Solution;
   onLearnMore: (s: Solution) => void;
+  responsibleLinks: ResponsibleLinksMap;
 };
 
-export const SolutionListRow: FC<SolutionListRowProps> = ({ solution, onLearnMore }) => {
+export const SolutionListRow: FC<SolutionListRowProps> = ({
+  solution,
+  onLearnMore,
+  responsibleLinks,
+}) => {
   const cta = getSolutionCta(solution);
 
   return (
@@ -27,28 +34,29 @@ export const SolutionListRow: FC<SolutionListRowProps> = ({ solution, onLearnMor
       </div>
 
       <div className="flex-grow min-w-0">
-        <h3 className="font-bold text-on-surface truncate">{solution.title}</h3>
-        <p className="text-xs text-on-surface-variant truncate">{solution.category}</p>
-      </div>
-
-      <div className="hidden md:block w-48">
-        <div className="flex items-center gap-2">
-          <User size={12} className="text-on-surface-variant" />
-          <span className="text-xs text-on-surface-variant truncate" title={solution.responsible}>
-            {solution.responsible}
-          </span>
+        <div className="min-w-0">
+          <h3 className="font-bold text-on-surface truncate">{solution.title}</h3>
+          <p className="text-xs text-on-surface-variant truncate">{solution.category}</p>
         </div>
       </div>
 
-      <div className="shrink-0">
+      <div className="hidden lg:flex lg:items-center lg:gap-3 lg:min-w-0">
         <span
-          className={`px-3 py-1 rounded-full text-xs font-bold font-label uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
+          className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold font-label uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
         >
           {solution.status}
         </span>
+        <div className="flex items-center gap-2">
+          <User size={12} className="text-on-surface-variant" />
+          <ResponsibleNames
+            responsible={solution.responsible}
+            responsibleLinks={responsibleLinks}
+            className="text-xs text-on-surface-variant truncate max-w-[220px]"
+          />
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2 shrink-0 lg:ml-auto">
         <button
           type="button"
           onClick={() => onLearnMore(solution)}

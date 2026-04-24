@@ -18,8 +18,11 @@ import type { Solution, Status } from '../types/solution';
 
 const DEFAULT_CSV_URL =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxF9erQcxDy42u8AuIjCjVZdnVrph0rni9egi1q_9l15iZQJHJjoimAmCnN10YPKWf9UrBIUMrtfKh/pub?gid=0&single=true&output=csv';
+const DEFAULT_RESPONSIBLES_CSV_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxF9erQcxDy42u8AuIjCjVZdnVrph0rni9egi1q_9l15iZQJHJjoimAmCnN10YPKWf9UrBIUMrtfKh/pub?gid=55102210&single=true&output=csv';
 
 type CsvRow = Record<string, string>;
+export type ResponsibleLinksMap = Record<string, string>;
 
 type CategoryPresentation = {
   icon: LucideIcon;
@@ -166,6 +169,10 @@ function splitMultiValue(value: string): string[] {
     .filter(Boolean);
 }
 
+function normalizePersonName(value: string): string {
+  return normalizeText(value).replace(/\s+/g, ' ').trim();
+}
+
 function mapStatus(value: string): Status {
   const raw = normalizeText(value);
   if (raw.includes('uso') || raw.includes('produc')) return 'Em uso';
@@ -245,4 +252,80 @@ export async function loadSolutionsFromCsv(csvUrl: string = DEFAULT_CSV_URL): Pr
   const csvText = await response.text();
   const rows = parseCsv(csvText);
   return rows.filter(hasSolutionName).map(mapRowToSolution);
+}
+
+function buildResponsiblesSheetUrl(baseCsvUrl: string): string | null {
+  const match = baseCsvUrl.match(/^(https:\/\/docs\.google\.com\/spreadsheets\/d\/e\/[^/]+)/);
+  if (!match) return null;
+  return `${match[1]}/gviz/tq?tqx=out:csv&sheet=responsaveis`;
+}
+
+function buildResponsiblesSheetCandidates(baseCsvUrl: string): string[] {
+  const candidates: string[] = [baseCsvUrl];
+
+  try {
+    const direct = new URL(baseCsvUrl);
+
+    const bySheetName = new URL(direct.toString());
+    bySheetName.searchParams.set('single', 'true');
+    bySheetName.searchParams.set('output', 'csv');
+    bySheetName.searchParams.set('sheet', 'responsaveis');
+    bySheetName.searchParams.delete('gid');
+    candidates.push(bySheetName.toString());
+
+    const bySheetAndGid = new URL(direct.toString());
+    bySheetAndGid.searchParams.set('single', 'true');
+    bySheetAndGid.searchParams.set('output', 'csv');
+    bySheetAndGid.searchParams.set('sheet', 'responsaveis');
+    candidates.push(bySheetAndGid.toString());
+  } catch {
+    // ignore malformed URL and keep gviz fallback only
+  }
+
+  const gvizUrl = buildResponsiblesSheetUrl(baseCsvUrl);
+  if (gvizUrl) candidates.push(gvizUrl);
+
+  return Array.from(new Set(candidates));
+}
+
+function isLikelyHttpUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value.trim());
+}
+
+export async function loadResponsibleLinksFromSheet(
+  responsiblesCsvUrl: string = DEFAULT_RESPONSIBLES_CSV_URL,
+): Promise<ResponsibleLinksMap> {
+  const candidates = buildResponsiblesSheetCandidates(responsiblesCsvUrl);
+  if (candidates.length === 0) return {};
+
+  for (const url of candidates) {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { Accept: 'text/csv' },
+      });
+
+      if (!response.ok) continue;
+
+      const csvText = await response.text();
+      const rows = parseCsv(csvText);
+
+      const linkByName: ResponsibleLinksMap = {};
+      rows.forEach((row) => {
+        const values = Object.values(row).map((value) => value.trim());
+        const name = values[0] ?? '';
+        const link = values[1] ?? '';
+        if (!name || !link || !isLikelyHttpUrl(link)) return;
+        linkByName[normalizePersonName(name)] = link;
+      });
+
+      if (Object.keys(linkByName).length > 0) {
+        return linkByName;
+      }
+    } catch {
+      // try next candidate
+    }
+  }
+
+  return {};
 }

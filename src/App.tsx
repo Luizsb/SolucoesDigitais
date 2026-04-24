@@ -15,7 +15,8 @@ import {
   Zap,
 } from 'lucide-react';
 import mascoteOficial from './assets/MascoteID.png';
-import { loadSolutionsFromCsv } from './lib/loadSolutionsFromCsv';
+import { loadResponsibleLinksFromSheet, loadSolutionsFromCsv } from './lib/loadSolutionsFromCsv';
+import type { ResponsibleLinksMap } from './lib/loadSolutionsFromCsv';
 import type { Solution, Tab, Theme, ViewMode } from './types/solution';
 import { KPICard } from './components/KPICard';
 import { SolutionCard } from './components/SolutionCard';
@@ -34,6 +35,7 @@ export default function App() {
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [isLoadingSolutions, setIsLoadingSolutions] = useState<boolean>(true);
   const [solutionsError, setSolutionsError] = useState<string | null>(null);
+  const [responsibleLinks, setResponsibleLinks] = useState<ResponsibleLinksMap>({});
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [activeFilter, setActiveFilter] = useState<string>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -60,6 +62,18 @@ export default function App() {
       try {
         const csvSolutions = await loadSolutionsFromCsv();
         if (!isMounted) return;
+
+        try {
+          const linksByResponsible = await loadResponsibleLinksFromSheet();
+          if (isMounted) {
+            setResponsibleLinks(linksByResponsible);
+          }
+        } catch {
+          // Não bloqueia o carregamento principal de soluções.
+          if (isMounted) {
+            setResponsibleLinks({});
+          }
+        }
 
         if (csvSolutions.length === 0) {
           setSolutions([]);
@@ -94,8 +108,17 @@ export default function App() {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
 
+  const splitResponsibles = (value: string): string[] =>
+    value
+      .split(';')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
   const categories = ['Todas', ...new Set(solutions.map((s) => s.category))];
-  const responsibles = ['Todos', ...new Set(solutions.map((s) => s.responsible))];
+  const responsibles = [
+    'Todos',
+    ...new Set(solutions.flatMap((s) => splitResponsibles(s.responsible))),
+  ];
   const hasActiveFilters =
     activeFilter !== 'Todos' ||
     categoryFilter !== 'Todas' ||
@@ -122,7 +145,7 @@ export default function App() {
     const matchesSearch = normalizedQuery === '' || searchableText.includes(normalizedQuery);
     const matchesCategory = categoryFilter === 'Todas' || s.category === categoryFilter;
     const matchesResponsible =
-      responsibleFilter === 'Todos' || s.responsible === responsibleFilter;
+      responsibleFilter === 'Todos' || splitResponsibles(s.responsible).includes(responsibleFilter);
 
     return matchesStatus && matchesSearch && matchesCategory && matchesResponsible;
   });
@@ -373,6 +396,7 @@ export default function App() {
                               key={solution.id}
                               solution={solution}
                               onLearnMore={setSelectedSolution}
+                            responsibleLinks={responsibleLinks}
                             />
                           ))}
                         </motion.div>
@@ -389,6 +413,7 @@ export default function App() {
                               key={solution.id}
                               solution={solution}
                               onLearnMore={setSelectedSolution}
+                              responsibleLinks={responsibleLinks}
                             />
                           ))}
                         </motion.div>
@@ -452,7 +477,13 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <SolutionsCatalog solutions={filteredSolutions} filtersSlot={renderFilters(false)} />
+              <SolutionsCatalog
+                solutions={filteredSolutions}
+                viewMode={viewMode}
+                onLearnMore={setSelectedSolution}
+                responsibleLinks={responsibleLinks}
+                filtersSlot={renderFilters(true)}
+              />
             </motion.div>
           )}
 
@@ -461,7 +492,7 @@ export default function App() {
 
       <footer className="w-full py-12 mt-20 border-t border-outline-variant/10 bg-background">
         <div className="flex justify-center items-center px-12 max-w-[1600px] mx-auto gap-8">
-          <div className="flex flex-col items-center md:items-start gap-2">
+          <div className="flex flex-col items-center text-center gap-2">
             <span className="text-on-surface font-semibold">Portfólio de Soluções Digitais</span>
             <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">
               © 2026. INTERAÇÕES DIGITAIS.
@@ -472,7 +503,11 @@ export default function App() {
 
       <AnimatePresence>
         {selectedSolution && (
-          <SolutionModal solution={selectedSolution} onClose={() => setSelectedSolution(null)} />
+          <SolutionModal
+            solution={selectedSolution}
+            onClose={() => setSelectedSolution(null)}
+            responsibleLinks={responsibleLinks}
+          />
         )}
       </AnimatePresence>
     </div>

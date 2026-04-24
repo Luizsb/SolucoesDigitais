@@ -4,13 +4,16 @@ import { ExternalLink, Info, Share2, User } from 'lucide-react';
 import { STATUS_BADGE_CLASSES } from '../lib/statusStyles';
 import { getSolutionCta } from '../lib/solutionCta';
 import type { Solution } from '../types/solution';
+import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
+import { ResponsibleNames } from './ResponsibleNames';
 
 type SolutionCardProps = {
   solution: Solution;
   onLearnMore: (s: Solution) => void;
+  responsibleLinks: ResponsibleLinksMap;
 };
 
-export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore }) => {
+export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore, responsibleLinks }) => {
   const cta = getSolutionCta(solution);
 
   return (
@@ -47,7 +50,12 @@ export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore }) =
         <div className="flex items-center gap-2">
           <User size={14} className="text-on-surface-variant" />
           <span className="text-xs text-on-surface-variant">
-            Responsável: <span className="text-on-surface">{solution.responsible}</span>
+            Responsável:{' '}
+            <ResponsibleNames
+              responsible={solution.responsible}
+              responsibleLinks={responsibleLinks}
+              className="text-on-surface"
+            />
           </span>
         </div>
         <div className="bg-background/40 p-4 rounded-xl">
