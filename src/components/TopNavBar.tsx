@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Bell, Moon, Plus, Search, Sun, X } from 'lucide-react';
 import brandIcon from '../assets/brand-icon.svg';
-import avatarPlaceholder from '../assets/covers/avatar-placeholder.svg';
 import type { Solution, Tab, Theme } from '../types/solution';
 
 type TopNavBarProps = {
@@ -171,13 +170,6 @@ export function TopNavBar({
               <Plus size={18} />
               Nova solução
             </button>
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/20 ml-2">
-              <img
-                src={avatarPlaceholder}
-                alt="Perfil do usuário"
-                className="w-full h-full object-cover"
-              />
-            </div>
           </div>
         </div>
       </div>
