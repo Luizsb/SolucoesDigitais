@@ -28,9 +28,9 @@ export function SolutionsCatalog({
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-on-surface mb-2">Catálogo Completo</h2>
+          <h2 className="text-3xl font-bold text-on-surface mb-2">Portfólio Completo</h2>
           <p className="text-on-surface-variant">
-            Explore todas as iniciativas e ferramentas disponíveis em nossa plataforma.
+            Explore todas as iniciativas digitais disponíveis, com visão unificada de status, responsáveis e acessos.
           </p>
         </div>
       </div>

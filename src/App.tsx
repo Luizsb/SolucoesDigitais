@@ -492,10 +492,13 @@ export default function App() {
                       <div className="w-full">
                         <div className="relative bg-surface-container-high rounded-xl border border-primary/20 shadow-lg shadow-black/20 px-4 py-3 text-left">
                           <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-surface-container-high border-l border-t border-primary/20" />
-                          <h4 className="text-sm font-bold text-primary mb-1">Sua solução ainda não está aqui?</h4>
+                          <h4 className="text-sm font-bold text-primary mb-1">
+                            Sua solução ainda não está no portfólio?
+                          </h4>
                           <p className="text-xs text-on-surface-variant leading-relaxed">
-                            Se você já usa uma solução no dia a dia e ela não aparece no catálogo, clique em{' '}
-                            <strong>Nova solução</strong> para cadastrar. O time analisa e publica na base oficial.
+                            Se você já usa uma solução no dia a dia e ela ainda não aparece no portfólio,
+                            clique em <strong>Nova solução</strong> para cadastrar. O time avalia e publica
+                            na base oficial.
                           </p>
                         </div>
                       </div>
