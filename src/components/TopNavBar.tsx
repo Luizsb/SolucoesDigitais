@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Bell, Moon, Plus, Search, Sun, X } from 'lucide-react';
 import brandIcon from '../assets/brand-icon.svg';
 import avatarPlaceholder from '../assets/covers/avatar-placeholder.svg';
-import type { Tab, Theme } from '../types/solution';
+import type { Solution, Tab, Theme } from '../types/solution';
 
 type TopNavBarProps = {
   theme: Theme;
@@ -11,6 +12,8 @@ type TopNavBarProps = {
   setSearchQuery: (val: string) => void;
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
+  unreadNotifications: Solution[];
+  onMarkNotificationsViewed: () => void;
 };
 
 export function TopNavBar({
@@ -20,7 +23,18 @@ export function TopNavBar({
   setSearchQuery,
   activeTab,
   setActiveTab,
+  unreadNotifications,
+  onMarkNotificationsViewed,
 }: TopNavBarProps) {
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  const handleToggleNotifications = () => {
+    if (!isNotificationOpen && unreadNotifications.length > 0) {
+      onMarkNotificationsViewed();
+    }
+    setIsNotificationOpen((prev) => !prev);
+  };
+
   return (
     <nav className="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/15 shadow-2xl shadow-black/20">
       <div className="flex justify-between items-center w-full px-8 py-4 mx-auto max-w-[1600px]">
@@ -106,12 +120,49 @@ export function TopNavBar({
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button
-              type="button"
-              className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
-            >
-              <Bell size={20} />
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={handleToggleNotifications}
+                className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95 relative"
+                title="Notificações"
+              >
+                <Bell size={20} />
+                {unreadNotifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-on-primary text-[10px] font-bold flex items-center justify-center">
+                    {unreadNotifications.length}
+                  </span>
+                )}
+              </button>
+              {isNotificationOpen && (
+                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border border-outline-variant/20 bg-surface-container shadow-xl p-3 z-50">
+                  <h4 className="text-sm font-semibold text-on-surface mb-2">Novos cadastros</h4>
+                  {unreadNotifications.length === 0 ? (
+                    <p className="text-xs text-on-surface-variant">Nenhuma novidade no momento.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {unreadNotifications.map((solution) => (
+                        <button
+                          key={solution.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveTab('dashboard');
+                            setIsNotificationOpen(false);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="w-full text-left rounded-lg p-2 hover:bg-surface-container-high transition-colors"
+                        >
+                          <p className="text-sm font-semibold text-on-surface truncate">{solution.title}</p>
+                          <p className="text-xs text-on-surface-variant truncate">
+                            {solution.category} - {solution.status}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => window.open('https://forms.gle/crhfQ6vRp3pUCghDA', '_blank', 'noopener,noreferrer')}

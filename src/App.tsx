@@ -26,6 +26,9 @@ import { SolutionsCatalog } from './components/SolutionsCatalog';
 import { TopNavBar } from './components/TopNavBar';
 
 export default function App() {
+  const KNOWN_SOLUTIONS_STORAGE_KEY = 'known-solution-ids';
+  const UNREAD_SOLUTIONS_STORAGE_KEY = 'unread-solution-ids';
+
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme');
     return (saved as Theme) || 'dark';
@@ -42,6 +45,7 @@ export default function App() {
   const [categoryFilter, setCategoryFilter] = useState<string>('Todas');
   const [responsibleFilter, setResponsibleFilter] = useState<string>('Todos');
   const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
+  const [unreadNotificationIds, setUnreadNotificationIds] = useState<string[]>([]);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -97,6 +101,30 @@ export default function App() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (solutions.length === 0) return;
+
+    const currentIds = solutions.map((solution) => solution.id);
+    const currentIdSet = new Set(currentIds);
+    const knownIds = JSON.parse(localStorage.getItem(KNOWN_SOLUTIONS_STORAGE_KEY) ?? '[]') as string[];
+    const unreadIds = JSON.parse(localStorage.getItem(UNREAD_SOLUTIONS_STORAGE_KEY) ?? '[]') as string[];
+
+    const knownIdSet = new Set(knownIds);
+    const unreadIdSet = new Set(unreadIds.filter((id) => currentIdSet.has(id)));
+
+    currentIds.forEach((id) => {
+      if (!knownIdSet.has(id)) {
+        unreadIdSet.add(id);
+      }
+    });
+
+    const nextUnreadIds = currentIds.filter((id) => unreadIdSet.has(id));
+    setUnreadNotificationIds(nextUnreadIds);
+
+    localStorage.setItem(KNOWN_SOLUTIONS_STORAGE_KEY, JSON.stringify(currentIds));
+    localStorage.setItem(UNREAD_SOLUTIONS_STORAGE_KEY, JSON.stringify(nextUnreadIds));
+  }, [solutions]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
@@ -163,6 +191,13 @@ export default function App() {
     setResponsibleFilter('Todos');
     setSearchQuery('');
   };
+
+  const markNotificationsAsViewed = () => {
+    setUnreadNotificationIds([]);
+    localStorage.setItem(UNREAD_SOLUTIONS_STORAGE_KEY, JSON.stringify([]));
+  };
+
+  const unreadNotifications = solutions.filter((solution) => unreadNotificationIds.includes(solution.id));
 
   const renderFilters = (showViewModeToggle: boolean) => (
     <div className="flex flex-wrap items-center gap-4 bg-surface-container/50 p-2 rounded-2xl">
@@ -282,6 +317,8 @@ export default function App() {
         setSearchQuery={setSearchQuery}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        unreadNotifications={unreadNotifications}
+        onMarkNotificationsViewed={markNotificationsAsViewed}
       />
 
       <main className="mt-24 px-8 max-w-[1600px] mx-auto w-full flex-grow">
