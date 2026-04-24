@@ -11,6 +11,7 @@
 
   --primary: #00668b;
   --primary-dim: #004d69;
+  --on-primary: #f8fcff;
   --primary-container: #c2e8ff;
   --on-primary-container: #001e2c;
 
@@ -34,6 +35,7 @@
 
   --primary: #3bbffa;
   --primary-dim: #05a9e3;
+  --on-primary: #001521;
   --primary-container: #22b1ec;
   --on-primary-container: #002b3d;
 
@@ -62,6 +64,7 @@
 
   --color-primary: var(--primary);
   --color-primary-dim: var(--primary-dim);
+  --color-on-primary: var(--on-primary);
   --color-primary-container: var(--primary-container);
   --color-on-primary-container: var(--on-primary-container);
 

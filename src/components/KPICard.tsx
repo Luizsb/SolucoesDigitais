@@ -9,7 +9,7 @@ export function KPICard({ label, value, colorClass, showPulse }: KPICardProps) {
   return (
     <div className="bg-surface-container p-4 rounded-xl border border-outline-variant/10 shadow-sm">
       <p
-        className={`font-label text-[10px] uppercase tracking-wider mb-1 ${colorClass || 'text-on-surface-variant'}`}
+        className={`font-label text-xs uppercase tracking-wider mb-1 ${colorClass || 'text-on-surface-variant'}`}
       >
         {label}
       </p>

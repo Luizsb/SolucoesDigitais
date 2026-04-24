@@ -226,7 +226,7 @@ export function SolutionModal({ solution, onClose }: SolutionModalProps) {
                   rel="noreferrer noopener"
                   className={`px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 ${
                     cta.kind === 'demo'
-                      ? 'border border-outline-variant/20 text-on-surface hover:bg-surface-container-high'
+                      ? 'bg-surface-container-high border border-outline-variant/45 text-on-surface shadow-sm hover:border-primary/50 hover:bg-primary/10'
                       : 'bg-surface-container-highest text-on-surface hover:bg-outline-variant/30'
                   }`}
                 >

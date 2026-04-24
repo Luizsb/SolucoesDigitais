@@ -29,7 +29,7 @@ export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore }) =
           </div>
           <div>
             <span
-              className={`font-label text-[10px] uppercase tracking-widest font-bold ${solution.iconColor}`}
+              className={`font-label text-xs uppercase tracking-widest font-bold ${solution.iconColor}`}
             >
               {solution.category}
             </span>
@@ -37,7 +37,7 @@ export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore }) =
           </div>
         </div>
         <span
-          className={`px-3 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
+          className={`px-3 py-1 rounded-full text-xs font-bold font-label uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
         >
           {solution.status}
         </span>
@@ -51,7 +51,7 @@ export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore }) =
           </span>
         </div>
         <div className="bg-background/40 p-4 rounded-xl">
-          <p className="text-[10px] font-label uppercase text-on-surface-variant tracking-wider mb-2">
+          <p className="text-xs font-label uppercase text-on-surface-variant tracking-wider mb-2">
             Impacto Principal
           </p>
           <p className="text-sm text-on-surface leading-snug">{solution.impact}</p>
@@ -75,7 +75,7 @@ export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore }) =
             rel="noreferrer noopener"
             className={`flex-grow font-semibold py-2.5 rounded-xl text-sm transition-all active:scale-95 flex items-center justify-center gap-2 ${
               cta.kind === 'demo'
-                ? 'border border-outline-variant/20 text-on-surface-variant hover:border-primary/40 hover:text-on-surface'
+                ? 'bg-surface-container-high border border-outline-variant/45 text-on-surface shadow-sm hover:border-primary/50 hover:bg-primary/10'
                 : 'bg-surface-container-highest text-on-surface hover:bg-outline-variant/30'
             }`}
           >

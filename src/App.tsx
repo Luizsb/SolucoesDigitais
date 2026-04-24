@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Grid,
   List as ListIcon,
+  LoaderCircle,
   Plus,
   User,
   Zap,
@@ -155,7 +156,7 @@ export default function App() {
             onClick={() => setActiveFilter(filter.id)}
             className={`px-4 py-2 rounded-lg text-sm transition-all whitespace-nowrap ${
               activeFilter === filter.id
-                ? 'font-semibold bg-primary text-on-primary-container shadow-lg'
+                ? 'font-semibold bg-primary text-on-primary shadow-lg'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
@@ -261,7 +262,7 @@ export default function App() {
       />
 
       <main className="mt-24 px-8 max-w-[1600px] mx-auto w-full flex-grow">
-        {isLoadingSolutions && (
+        {isLoadingSolutions && solutions.length > 0 && (
           <div className="mb-4 rounded-xl border border-outline-variant/20 bg-surface-container p-3 text-sm text-on-surface-variant">
             Carregando soluções da planilha...
           </div>
@@ -347,41 +348,53 @@ export default function App() {
                   )}
                   {renderFilters(true)}
 
-                  <AnimatePresence mode="wait">
-                    {viewMode === 'grid' ? (
-                      <motion.div
-                        key="grid"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                      >
-                        {filteredSolutions.map((solution) => (
-                          <SolutionCard
-                            key={solution.id}
-                            solution={solution}
-                            onLearnMore={setSelectedSolution}
-                          />
-                        ))}
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="list"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex flex-col gap-3"
-                      >
-                        {filteredSolutions.map((solution) => (
-                          <SolutionListRow
-                            key={solution.id}
-                            solution={solution}
-                            onLearnMore={setSelectedSolution}
-                          />
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isLoadingSolutions && solutions.length === 0 ? (
+                    <div className="rounded-2xl border border-outline-variant/20 bg-surface-container/60 p-8 text-center">
+                      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <LoaderCircle className="animate-spin" size={28} />
+                      </div>
+                      <h2 className="text-xl font-semibold text-on-surface">Carregando cadastros...</h2>
+                      <p className="mt-2 text-sm text-on-surface-variant">
+                        Estamos buscando os dados da planilha. Isso pode levar alguns segundos.
+                      </p>
+                    </div>
+                  ) : (
+                    <AnimatePresence mode="wait">
+                      {viewMode === 'grid' ? (
+                        <motion.div
+                          key="grid"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                        >
+                          {filteredSolutions.map((solution) => (
+                            <SolutionCard
+                              key={solution.id}
+                              solution={solution}
+                              onLearnMore={setSelectedSolution}
+                            />
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="list"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="flex flex-col gap-3"
+                        >
+                          {filteredSolutions.map((solution) => (
+                            <SolutionListRow
+                              key={solution.id}
+                              solution={solution}
+                              onLearnMore={setSelectedSolution}
+                            />
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
                 </div>
 
                 <aside className="w-full xl:w-80 space-y-6">

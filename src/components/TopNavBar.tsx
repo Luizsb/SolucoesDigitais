@@ -115,7 +115,7 @@ export function TopNavBar({
             <button
               type="button"
               onClick={() => window.open('https://forms.gle/crhfQ6vRp3pUCghDA', '_blank', 'noopener,noreferrer')}
-              className="bg-gradient-to-br from-primary to-primary-dim text-on-primary-container px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 transition-all shadow-lg shadow-primary/10 flex items-center gap-2"
+              className="bg-gradient-to-br from-primary to-primary-dim text-on-primary px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 transition-all shadow-lg shadow-primary/10 flex items-center gap-2"
             >
               <Plus size={18} />
               Nova solução

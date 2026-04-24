@@ -42,7 +42,7 @@ export const SolutionListRow: FC<SolutionListRowProps> = ({ solution, onLearnMor
 
       <div className="shrink-0">
         <span
-          className={`px-3 py-1 rounded-full text-[10px] font-bold font-label uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
+          className={`px-3 py-1 rounded-full text-xs font-bold font-label uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
         >
           {solution.status}
         </span>
@@ -63,7 +63,7 @@ export const SolutionListRow: FC<SolutionListRowProps> = ({ solution, onLearnMor
             rel="noreferrer noopener"
             className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               cta.kind === 'demo'
-                ? 'border border-outline-variant/20 text-on-surface-variant hover:text-on-surface hover:border-primary/40'
+                ? 'bg-surface-container-high border border-outline-variant/45 text-on-surface shadow-sm hover:border-primary/50 hover:bg-primary/10'
                 : 'bg-surface-container-highest text-on-surface hover:bg-outline-variant/30'
             }`}
           >

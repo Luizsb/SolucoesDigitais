@@ -40,7 +40,7 @@ export function SolutionsCatalog({ solutions, filtersSlot }: SolutionsCatalogPro
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="text-xl font-bold text-on-surface">{s.title}</h3>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${STATUS_BADGE_CLASSES[s.status]}`}
+                    className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${STATUS_BADGE_CLASSES[s.status]}`}
                   >
                     {s.status}
                   </span>
@@ -52,7 +52,7 @@ export function SolutionsCatalog({ solutions, filtersSlot }: SolutionsCatalogPro
                   {s.tags.slice(0, 3).map((tag) => (
                     <span
                       key={`${s.id}-tag-${tag}`}
-                      className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
                     >
                       {tag}
                     </span>
@@ -90,7 +90,7 @@ export function SolutionsCatalog({ solutions, filtersSlot }: SolutionsCatalogPro
                       rel="noreferrer noopener"
                       className={`flex-grow lg:w-40 text-center font-bold py-2.5 rounded-xl text-xs transition-all inline-flex items-center justify-center gap-2 ${
                         cta.kind === 'demo'
-                          ? 'border border-outline-variant/20 text-on-surface-variant hover:text-on-surface hover:border-primary/40'
+                          ? 'bg-surface-container-high border border-outline-variant/45 text-on-surface shadow-sm hover:border-primary/50 hover:bg-primary/10'
                           : 'bg-surface-container-highest text-on-surface hover:bg-outline-variant/30'
                       }`}
                     >
