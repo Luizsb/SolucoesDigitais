@@ -12,12 +12,14 @@ type SolutionListRowProps = {
   solution: Solution;
   onLearnMore: (s: Solution) => void;
   responsibleLinks: ResponsibleLinksMap;
+  isTourTarget?: boolean;
 };
 
 export const SolutionListRow: FC<SolutionListRowProps> = ({
   solution,
   onLearnMore,
   responsibleLinks,
+  isTourTarget = false,
 }) => {
   const cta = getSolutionCta(solution);
 
@@ -60,6 +62,7 @@ export const SolutionListRow: FC<SolutionListRowProps> = ({
         <button
           type="button"
           onClick={() => onLearnMore(solution)}
+          data-tour={isTourTarget ? 'saiba-mais' : undefined}
           className="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-all shadow-md shadow-primary/10"
         >
           Saiba mais

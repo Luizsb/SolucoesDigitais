@@ -25,9 +25,18 @@ import { SolutionModal } from './components/SolutionModal';
 import { SolutionsCatalog } from './components/SolutionsCatalog';
 import { TopNavBar } from './components/TopNavBar';
 
+declare global {
+  interface Window {
+    introJs?: () => {
+      setOptions: (options: Record<string, unknown>) => { start: () => void };
+    };
+  }
+}
+
 export default function App() {
   const KNOWN_SOLUTIONS_STORAGE_KEY = 'known-solution-ids';
   const UNREAD_SOLUTIONS_STORAGE_KEY = 'unread-solution-ids';
+  const ONBOARDING_SEEN_STORAGE_KEY = 'onboarding-seen-v1';
 
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme');
@@ -199,8 +208,125 @@ export default function App() {
 
   const unreadNotifications = solutions.filter((solution) => unreadNotificationIds.includes(solution.id));
 
+  const ensureIntroJsLoaded = async (): Promise<boolean> => {
+    if (window.introJs) return true;
+
+    const existingScript = document.querySelector(
+      'script[data-introjs-cdn="true"]',
+    ) as HTMLScriptElement | null;
+    if (existingScript) {
+      return new Promise<boolean>((resolve) => {
+        existingScript.addEventListener('load', () => resolve(Boolean(window.introJs)), { once: true });
+        existingScript.addEventListener('error', () => resolve(false), { once: true });
+      });
+    }
+
+    if (!document.querySelector('link[data-introjs-cdn="true"]')) {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://cdn.jsdelivr.net/npm/intro.js/minified/introjs.min.css';
+      css.setAttribute('data-introjs-cdn', 'true');
+      document.head.appendChild(css);
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/intro.js/minified/intro.min.js';
+    script.async = true;
+    script.setAttribute('data-introjs-cdn', 'true');
+
+    const loaded = new Promise<boolean>((resolve) => {
+      script.onload = () => resolve(Boolean(window.introJs));
+      script.onerror = () => resolve(false);
+    });
+    document.body.appendChild(script);
+    return loaded;
+  };
+
+  const startOnboarding = async () => {
+    const loaded = await ensureIntroJsLoaded();
+    if (!loaded || !window.introJs) return;
+
+    window
+      .introJs()
+      .setOptions({
+        nextLabel: 'Próximo',
+        prevLabel: 'Voltar',
+        doneLabel: 'Concluir',
+        skipLabel: 'Pular',
+        showProgress: false,
+        tooltipClass: 'portfolio-intro-tooltip',
+        highlightClass: 'portfolio-intro-highlight',
+        disableInteraction: true,
+        overlayOpacity: 0.65,
+        scrollToElement: true,
+        steps: [
+          {
+            title: 'Bem-vindo ao Portfólio',
+            intro:
+              'Este tour guiado apresenta os principais recursos do Portfólio de Soluções Digitais para pesquisa, acompanhamento e cadastro de iniciativas.',
+          },
+          {
+            element: '[data-tour="busca"]',
+            title: 'Busca',
+            intro:
+              'Use a busca global para localizar soluções por nome, impacto, categoria, responsáveis e termos relacionados na descrição.',
+          },
+          {
+            element: '[data-tour="filtros"]',
+            title: 'Filtros',
+            intro:
+              'Refine os resultados por status, categoria e responsáveis para chegar rapidamente ao recorte desejado.',
+            position: 'bottom',
+          },
+          {
+            element: '[data-tour="modo-visualizacao"]',
+            title: 'Visualização',
+            intro:
+              'Alterne entre grade e lista conforme seu objetivo: visão resumida para exploração ou visão detalhada para comparação.',
+          },
+          {
+            element: '[data-tour="saiba-mais"]',
+            title: 'Exemplo prático: Saiba mais',
+            intro:
+              'Ao encontrar uma solução de interesse, clique em Saiba mais para abrir os detalhes completos: descrição, problema resolvido, impacto, funcionalidades e links úteis.',
+            position: 'right',
+          },
+          {
+            element: '[data-tour="notificacoes"]',
+            title: 'Notificações',
+            intro:
+              'Acompanhe novos cadastros recebidos pela base e mantenha seu time atualizado sobre novidades do portfólio.',
+          },
+          {
+            element: '[data-tour="nova-solucao"]',
+            title: 'Nova solução',
+            intro:
+              'Clique em Nova solução para enviar um cadastro. As informações seguem para a planilha oficial, onde passam por avaliação antes da publicação no portfólio.',
+          },
+          {
+            element: '[data-tour="tour"]',
+            title: 'Tour guiado',
+            intro: 'Use este botão sempre que quiser revisar o onboarding ou apresentar a plataforma para outra pessoa.',
+          },
+        ],
+      })
+      .start();
+  };
+
+  useEffect(() => {
+    if (isLoadingSolutions || solutions.length === 0) return;
+    if (localStorage.getItem(ONBOARDING_SEEN_STORAGE_KEY) === 'true') return;
+
+    const timer = window.setTimeout(() => {
+      void startOnboarding();
+      localStorage.setItem(ONBOARDING_SEEN_STORAGE_KEY, 'true');
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [isLoadingSolutions, solutions.length]);
+
   const renderFilters = (showViewModeToggle: boolean) => (
-    <div className="flex flex-wrap items-center gap-4 bg-surface-container/50 p-2 rounded-2xl">
+    <div data-tour="filtros" className="flex flex-wrap items-center gap-4 bg-surface-container/50 p-2 rounded-2xl">
       <div className="flex items-center p-1 bg-surface-container-low rounded-xl">
         {[
           { id: 'Todos', label: 'Todos' },
@@ -276,7 +402,7 @@ export default function App() {
       </div>
 
       {showViewModeToggle && (
-        <div className="flex items-center gap-3 ml-auto">
+        <div data-tour="modo-visualizacao" className="flex items-center gap-3 ml-auto">
           <div className="h-8 w-px bg-outline-variant/20 mx-1" />
 
           <div className="flex items-center bg-surface-container-high rounded-lg p-1">
@@ -319,6 +445,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         unreadNotifications={unreadNotifications}
         onMarkNotificationsViewed={markNotificationsAsViewed}
+        onStartOnboarding={startOnboarding}
       />
 
       <main className="mt-24 px-8 max-w-[1600px] mx-auto w-full flex-grow">
@@ -376,7 +503,7 @@ export default function App() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto"
+                    className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full lg:w-auto"
                   >
                     <KPICard label="Total Iniciativas" value={String(totalSolutions).padStart(2, '0')} />
                     <KPICard
@@ -428,12 +555,13 @@ export default function App() {
                           exit={{ opacity: 0 }}
                           className="grid grid-cols-1 md:grid-cols-2 gap-6"
                         >
-                          {filteredSolutions.map((solution) => (
+                          {filteredSolutions.map((solution, index) => (
                             <SolutionCard
                               key={solution.id}
                               solution={solution}
                               onLearnMore={setSelectedSolution}
-                            responsibleLinks={responsibleLinks}
+                              responsibleLinks={responsibleLinks}
+                              isTourTarget={index === 0}
                             />
                           ))}
                         </motion.div>
@@ -445,12 +573,13 @@ export default function App() {
                           exit={{ opacity: 0 }}
                           className="flex flex-col gap-3"
                         >
-                          {filteredSolutions.map((solution) => (
+                          {filteredSolutions.map((solution, index) => (
                             <SolutionListRow
                               key={solution.id}
                               solution={solution}
                               onLearnMore={setSelectedSolution}
                               responsibleLinks={responsibleLinks}
+                              isTourTarget={index === 0}
                             />
                           ))}
                         </motion.div>

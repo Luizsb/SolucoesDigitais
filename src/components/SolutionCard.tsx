@@ -11,9 +11,15 @@ type SolutionCardProps = {
   solution: Solution;
   onLearnMore: (s: Solution) => void;
   responsibleLinks: ResponsibleLinksMap;
+  isTourTarget?: boolean;
 };
 
-export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore, responsibleLinks }) => {
+export const SolutionCard: FC<SolutionCardProps> = ({
+  solution,
+  onLearnMore,
+  responsibleLinks,
+  isTourTarget = false,
+}) => {
   const cta = getSolutionCta(solution);
 
   return (
@@ -70,6 +76,7 @@ export const SolutionCard: FC<SolutionCardProps> = ({ solution, onLearnMore, res
         <button
           type="button"
           onClick={() => onLearnMore(solution)}
+          data-tour={isTourTarget ? 'saiba-mais' : undefined}
           className="flex-grow bg-primary text-on-primary font-semibold py-2.5 rounded-xl text-sm transition-all hover:opacity-90 active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
         >
           <Info size={16} />

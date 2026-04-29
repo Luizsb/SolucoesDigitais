@@ -111,3 +111,111 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-outline-variant);
 }
+
+/* Intro.js custom style aligned with platform theme */
+.introjs-overlay {
+  z-index: 1200 !important;
+}
+
+.introjs-helperLayer {
+  z-index: 1201 !important;
+}
+
+.introjs-tooltipReferenceLayer {
+  z-index: 1203 !important;
+}
+
+.portfolio-intro-tooltip {
+  background: var(--color-surface-container) !important;
+  color: var(--color-on-surface) !important;
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 35%, transparent) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important;
+  min-width: min(380px, calc(100vw - 32px)) !important;
+  max-width: min(380px, calc(100vw - 32px)) !important;
+  padding: 0 !important;
+  z-index: 1204 !important;
+}
+
+.portfolio-intro-tooltip .introjs-tooltip-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 16px 18px 0 !important;
+}
+
+.portfolio-intro-tooltip .introjs-tooltip-title,
+.portfolio-intro-tooltip .introjs-tooltipTitle {
+  color: var(--color-on-surface) !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+  padding-right: 8px !important;
+}
+
+.portfolio-intro-tooltip .introjs-tooltiptext,
+.portfolio-intro-tooltip .introjs-tooltipText {
+  color: var(--color-on-surface-variant) !important;
+  font-size: 0.98rem !important;
+  line-height: 1.55 !important;
+  padding: 14px 18px 8px !important;
+}
+
+.portfolio-intro-tooltip .introjs-tooltiptext *,
+.portfolio-intro-tooltip .introjs-tooltipText * {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+.portfolio-intro-tooltip .introjs-skipbutton {
+  position: static !important;
+  float: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--color-on-surface-variant) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  text-decoration: none !important;
+}
+
+.portfolio-intro-tooltip .introjs-bullets {
+  margin-top: 2px !important;
+}
+
+.portfolio-intro-tooltip .introjs-progressbar {
+  background: var(--color-primary) !important;
+}
+
+.portfolio-intro-tooltip .introjs-bullets ul li a {
+  background: color-mix(in srgb, var(--color-outline-variant) 70%, transparent) !important;
+}
+
+.portfolio-intro-tooltip .introjs-bullets ul li a.active {
+  background: var(--color-primary) !important;
+}
+
+.portfolio-intro-tooltip .introjs-button {
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 35%, transparent) !important;
+  border-radius: 10px !important;
+  color: var(--color-on-surface) !important;
+  background: var(--color-surface-container-high) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  padding: 8px 14px !important;
+}
+
+.portfolio-intro-tooltip .introjs-nextbutton {
+  background: var(--color-primary) !important;
+  border-color: transparent !important;
+  color: var(--color-on-primary) !important;
+}
+
+.portfolio-intro-tooltip .introjs-nextbutton:focus,
+.portfolio-intro-tooltip .introjs-prevbutton:focus,
+.portfolio-intro-tooltip .introjs-skipbutton:focus {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}

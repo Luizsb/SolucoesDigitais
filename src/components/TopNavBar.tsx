@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Moon, Plus, Search, Sun, X } from 'lucide-react';
+import { Bell, CircleHelp, Moon, Plus, Search, Sun, X } from 'lucide-react';
 import brandIcon from '../assets/brand-icon.svg';
 import type { Solution, Tab, Theme } from '../types/solution';
 
@@ -13,6 +13,7 @@ type TopNavBarProps = {
   setActiveTab: (tab: Tab) => void;
   unreadNotifications: Solution[];
   onMarkNotificationsViewed: () => void;
+  onStartOnboarding: () => void;
 };
 
 export function TopNavBar({
@@ -24,6 +25,7 @@ export function TopNavBar({
   setActiveTab,
   unreadNotifications,
   onMarkNotificationsViewed,
+  onStartOnboarding,
 }: TopNavBarProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
@@ -93,6 +95,7 @@ export function TopNavBar({
               size={16}
             />
             <input
+              data-tour="busca"
               type="text"
               placeholder="Buscar soluções..."
               value={searchQuery}
@@ -114,15 +117,26 @@ export function TopNavBar({
             <button
               type="button"
               onClick={toggleTheme}
+              data-tour="tema"
               className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
               title={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
+            <button
+              type="button"
+              onClick={onStartOnboarding}
+              data-tour="tour"
+              className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
+              title="Iniciar tour guiado"
+            >
+              <CircleHelp size={20} />
+            </button>
             <div className="relative">
               <button
                 type="button"
                 onClick={handleToggleNotifications}
+                data-tour="notificacoes"
                 className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95 relative"
                 title="Notificações"
               >
@@ -165,6 +179,7 @@ export function TopNavBar({
             <button
               type="button"
               onClick={() => window.open('https://forms.gle/crhfQ6vRp3pUCghDA', '_blank', 'noopener,noreferrer')}
+              data-tour="nova-solucao"
               className="bg-gradient-to-br from-primary to-primary-dim text-on-primary px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 transition-all shadow-lg shadow-primary/10 flex items-center gap-2"
             >
               <Plus size={18} />
