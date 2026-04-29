@@ -4,6 +4,7 @@ type ResponsibleNamesProps = {
   responsible: string;
   responsibleLinks: ResponsibleLinksMap;
   className?: string;
+  linkClassName?: string;
 };
 
 function normalizePersonName(value: string): string {
@@ -15,7 +16,12 @@ function normalizePersonName(value: string): string {
     .trim();
 }
 
-export function ResponsibleNames({ responsible, responsibleLinks, className }: ResponsibleNamesProps) {
+export function ResponsibleNames({
+  responsible,
+  responsibleLinks,
+  className,
+  linkClassName,
+}: ResponsibleNamesProps) {
   const names = responsible
     .split(';')
     .map((name) => name.trim())
@@ -33,7 +39,10 @@ export function ResponsibleNames({ responsible, responsibleLinks, className }: R
                 href={link}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="text-primary underline underline-offset-2 decoration-primary/60 hover:text-primary-dim"
+                className={
+                  linkClassName ??
+                  'text-primary underline underline-offset-2 decoration-primary/60 hover:text-primary-dim'
+                }
                 title={`Abrir conversa no Slack com ${name}`}
               >
                 {name}

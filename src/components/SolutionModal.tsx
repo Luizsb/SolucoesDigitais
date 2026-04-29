@@ -11,7 +11,6 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { STATUS_BADGE_CLASSES } from '../lib/statusStyles';
 import type { Solution } from '../types/solution';
 import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
 import { ResponsibleNames } from './ResponsibleNames';
@@ -32,6 +31,14 @@ export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionM
     .split(';')
     .map((item) => item.trim())
     .filter(Boolean);
+  const sidebarStatusBadgeClasses = {
+    'Em uso':
+      'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/30 dark:text-emerald-100 dark:border-emerald-300/50',
+    Piloto:
+      'bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-500/30 dark:text-amber-100 dark:border-amber-300/50',
+    'Em desenvolvimento':
+      'bg-sky-100 text-sky-900 border border-sky-300 dark:bg-sky-500/30 dark:text-sky-100 dark:border-sky-300/50',
+  } as const;
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -70,33 +77,39 @@ export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionM
           <div className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-center items-center md:items-start text-center md:text-left p-6 gap-4">
             <div
-              className={`w-12 h-12 rounded-xl ${solution.iconBg} flex items-center justify-center ${solution.iconColor} mb-3 backdrop-blur-md`}
+              className={`w-12 h-12 rounded-xl ${solution.iconBg} flex items-center justify-center ${solution.iconColor} mb-3 backdrop-blur-md border border-white/35 shadow-md shadow-black/25`}
             >
               {React.cloneElement(solution.icon as React.ReactElement, { size: 28 })}
             </div>
             <h2 className="text-2xl lg:text-3xl font-bold text-white leading-tight">{solution.title}</h2>
-            <div className="w-full max-w-[280px] md:max-w-none rounded-xl border border-white/15 bg-black/25 backdrop-blur-sm p-3 space-y-3">
+            <div className="w-full max-w-[280px] md:max-w-none rounded-xl border border-black/10 dark:border-white/15 bg-white/80 dark:bg-black/25 backdrop-blur-sm p-3 space-y-3">
               <div className="space-y-2">
-                <p className="text-[10px] font-label uppercase tracking-wider text-white/70">Tipo e status</p>
+                <p className="text-[10px] font-label uppercase tracking-wider text-on-surface-variant dark:text-white/70">
+                  Tipo e status
+                </p>
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                  <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/25">
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-200/20 dark:text-slate-100 dark:border-slate-200/40">
                     {solution.category}
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
+                    className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${sidebarStatusBadgeClasses[solution.status]}`}
                   >
                     {solution.status}
                   </span>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <p className="text-[10px] font-label uppercase tracking-wider text-white/70">
+                <p className="text-[10px] font-label uppercase tracking-wider text-on-surface-variant dark:text-white/70">
                   {responsibleList.length > 1 ? 'Responsáveis' : 'Responsável'}
                 </p>
                 <div className="space-y-1 text-center md:text-left">
                   {responsibleList.map((name) => (
-                    <p key={`left-resp-${name}`} className="text-xs text-white/90">
-                      <ResponsibleNames responsible={name} responsibleLinks={responsibleLinks} />
+                    <p key={`left-resp-${name}`} className="text-xs text-on-surface dark:text-white/90">
+                      <ResponsibleNames
+                        responsible={name}
+                        responsibleLinks={responsibleLinks}
+                        linkClassName="text-primary dark:text-white underline underline-offset-2 decoration-primary/60 dark:decoration-white/50 hover:text-primary-dim dark:hover:text-white"
+                      />
                     </p>
                   ))}
                 </div>
