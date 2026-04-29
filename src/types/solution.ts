@@ -11,6 +11,11 @@ export interface Solution {
   category: string;
   status: Status;
   responsible: string;
+  oQueE: string;
+  quandoUsar: string[];
+  resultadoEsperado: string;
+  comoUsar?: string;
+  observacoes?: string;
   problemSolved?: string;
   problemTypes: string[];
   impact: string;

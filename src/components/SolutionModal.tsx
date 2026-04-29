@@ -1,17 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import {
+  AlertTriangle,
   CheckCircle2,
+  ChevronDown,
   ExternalLink,
   Info,
+  Rocket,
   Share2,
-  Target,
   User,
   X,
-  Zap,
 } from 'lucide-react';
 import { STATUS_BADGE_CLASSES } from '../lib/statusStyles';
-import { getSolutionCta } from '../lib/solutionCta';
 import type { Solution } from '../types/solution';
 import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
 import { ResponsibleNames } from './ResponsibleNames';
@@ -23,10 +23,26 @@ type SolutionModalProps = {
 };
 
 export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionModalProps) {
-  const cta = getSolutionCta(solution);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
+  const responsibleList = solution.responsible
+    .split(';')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const resultadoItems = solution.resultadoEsperado
+    .split(';')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+    <div className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-3 md:p-6 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -38,7 +54,7 @@ export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionM
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-4xl bg-surface-container rounded-3xl overflow-hidden shadow-2xl border border-outline-variant/10 flex flex-col md:flex-row max-h-[90vh]"
+        className="relative w-full md:w-[94vw] max-w-[1400px] bg-surface-container rounded-3xl shadow-2xl border border-outline-variant/10 grid grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)] lg:grid-cols-[340px_minmax(0,1fr)] max-h-none md:h-[90vh] overflow-visible md:overflow-hidden mx-auto my-3 md:my-0"
       >
         <button
           type="button"
@@ -48,201 +64,238 @@ export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionM
           <X size={20} />
         </button>
 
-        <div className="w-full md:w-2/5 h-48 md:h-auto relative">
+        <div className="w-full h-48 md:h-auto relative md:min-h-[620px]">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary-dim/40 to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,191,250,0.35),transparent_45%)]" />
           <div className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-primary/20 blur-3xl" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-center items-center md:items-start text-center md:text-left p-6 gap-4">
             <div
               className={`w-12 h-12 rounded-xl ${solution.iconBg} flex items-center justify-center ${solution.iconColor} mb-3 backdrop-blur-md`}
             >
               {React.cloneElement(solution.icon as React.ReactElement, { size: 28 })}
             </div>
-            <h2 className="text-3xl font-bold text-white">{solution.title}</h2>
-            <p className="text-white/80 text-sm">{solution.category}</p>
+            <h2 className="text-2xl lg:text-3xl font-bold text-white leading-tight">{solution.title}</h2>
+            <div className="w-full max-w-[280px] md:max-w-none rounded-xl border border-white/15 bg-black/25 backdrop-blur-sm p-3 space-y-3">
+              <div className="space-y-2">
+                <p className="text-[10px] font-label uppercase tracking-wider text-white/70">Tipo e status</p>
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                  <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/25">
+                    {solution.category}
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${STATUS_BADGE_CLASSES[solution.status]}`}
+                  >
+                    {solution.status}
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-label uppercase tracking-wider text-white/70">
+                  {responsibleList.length > 1 ? 'Responsáveis' : 'Responsável'}
+                </p>
+                <div className="space-y-1 text-center md:text-left">
+                  {responsibleList.map((name) => (
+                    <p key={`left-resp-${name}`} className="text-xs text-white/90">
+                      <ResponsibleNames responsible={name} responsibleLinks={responsibleLinks} />
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex-grow p-6 md:p-10 overflow-y-auto custom-scrollbar">
-          <div className="mb-8 flex flex-col items-start gap-3 pr-14">
-            <span
-              className={`inline-flex shrink-0 px-4 py-1.5 rounded-full text-xs font-bold font-label uppercase tracking-widest ${STATUS_BADGE_CLASSES[solution.status]}`}
-            >
-              {solution.status}
-            </span>
-            <div className="flex min-w-0 items-start gap-2 text-on-surface-variant">
-              <User size={16} className="mt-0.5 shrink-0" />
-              <span className="text-sm font-medium leading-snug break-words">
-                Responsável:{' '}
-                <ResponsibleNames
-                  responsible={solution.responsible}
-                  responsibleLinks={responsibleLinks}
-                />
-              </span>
-            </div>
-          </div>
-
+        <div className="min-w-0 min-h-0 p-5 md:p-8 lg:p-10 pb-10 md:pb-14 overflow-visible md:overflow-y-auto custom-scrollbar">
           <div className="space-y-8">
             <section>
               <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
-                <Info size={14} /> Sobre a Solução
+                <Info size={14} /> Entenda rápido
               </h4>
-              <p className="text-on-surface leading-relaxed">{solution.description}</p>
-            </section>
-
-            {solution.problemSolved && (
-              <section>
-                <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-3">
-                  Problema resolvido
-                </h4>
-                <p className="text-on-surface leading-relaxed">{solution.problemSolved}</p>
-              </section>
-            )}
-
-            {(solution.problemTypes.length > 0 || solution.impactTypes.length > 0 || solution.tags.length > 0) && (
-              <section className="space-y-4">
-                {solution.problemTypes.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-2">
-                      Tipo de problema
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {solution.problemTypes.map((item) => (
-                        <span
-                          key={`problem-${item}`}
-                          className="px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-container-low border border-outline-variant/10 text-on-surface-variant"
-                        >
-                          {item}
-                        </span>
+              <div className="space-y-4">
+                <div className="rounded-xl border border-outline-variant/15 bg-surface-container-low p-4">
+                  <p className="text-xs font-label uppercase tracking-wider text-on-surface-variant mb-2">O que é</p>
+                  <p className="text-sm text-on-surface leading-relaxed">{solution.oQueE}</p>
+                </div>
+                <div className="rounded-xl border border-primary/25 bg-primary/10 p-4">
+                  <p className="text-xs font-label uppercase tracking-wider text-primary mb-2">Quando usar</p>
+                  {solution.quandoUsar.length > 0 ? (
+                    <ul className="space-y-1.5">
+                      {solution.quandoUsar.map((item) => (
+                        <li key={item} className="text-sm text-on-surface flex gap-2">
+                          <span className="mt-2 inline-block h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                          <span>{item}</span>
+                        </li>
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {solution.impactTypes.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-2">
-                      Tipo de impacto
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {solution.impactTypes.map((item) => (
-                        <span
-                          key={`impact-${item}`}
-                          className="px-2.5 py-1 rounded-lg text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {solution.tags.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Tags</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {solution.tags.map((item) => (
-                        <span
-                          key={`tag-${item}`}
-                          className="px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </section>
-            )}
-
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4 flex items-center gap-2">
-                  <Target size={14} /> Impacto Gerado
-                </h4>
-                <p className="text-sm text-on-surface leading-relaxed italic">
-                  {`"${solution.impact}"`}
-                </p>
-              </div>
-
-              <div className="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/5">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-tertiary mb-4 flex items-center gap-2">
-                  <Zap size={14} /> Funcionalidades
-                </h4>
-                <ul className="space-y-2">
-                  {solution.features.map((feature, i) => (
-                    <li key={i} className="text-sm text-on-surface flex items-start gap-2">
-                      <CheckCircle2 size={14} className="text-tertiary mt-0.5 shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-
-            {(solution.link || solution.demoLink || solution.documentationLink) && (
-              <section>
-                <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-3">
-                  Links disponíveis
-                </h4>
-                <div className="space-y-2 text-sm">
-                  {solution.link && (
-                    <a
-                      href={solution.link}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="flex items-center gap-2 text-on-surface hover:text-primary transition-colors"
-                    >
-                      <ExternalLink size={14} /> Ferramenta/Solução
-                    </a>
-                  )}
-                  {solution.demoLink && (
-                    <a
-                      href={solution.demoLink}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="flex items-center gap-2 text-on-surface hover:text-primary transition-colors"
-                    >
-                      <Share2 size={14} /> Demo
-                    </a>
-                  )}
-                  {solution.documentationLink && (
-                    <a
-                      href={solution.documentationLink}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="flex items-center gap-2 text-on-surface hover:text-primary transition-colors"
-                    >
-                      <ExternalLink size={14} /> Documentação
-                    </a>
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-on-surface-variant">Não informado.</p>
                   )}
                 </div>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-3">Contexto</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-tertiary/35 bg-tertiary/10 p-4">
+                  <p className="text-sm font-bold uppercase tracking-wider text-tertiary mb-3 flex items-center gap-2">
+                    <AlertTriangle size={14} />
+                    Problema que resolve
+                  </p>
+                  <p className="text-sm text-on-surface leading-relaxed font-medium">
+                    {solution.problemSolved || 'Não informado.'}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-secondary/35 bg-secondary/10 p-4">
+                  <p className="text-sm font-bold uppercase tracking-wider text-secondary mb-3 flex items-center gap-2">
+                    <Rocket size={14} />
+                    Impacto / Resultado
+                  </p>
+                  <ul className="space-y-2">
+                    {(resultadoItems.length > 0 ? resultadoItems : [solution.resultadoEsperado]).map((item) => (
+                      <li key={`resultado-${item}`} className="text-sm text-on-surface flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-secondary mt-0.5 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-primary/20 bg-primary/5 p-4 md:p-5">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-primary mb-3 flex items-center gap-2">
+                <Share2 size={14} /> Como acessar / usar
+              </h4>
+              <p className="text-base text-on-surface-variant leading-relaxed mb-4">
+                {solution.comoUsar || 'Use os links disponíveis para acessar, testar ou consultar documentação.'}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {solution.link && (
+                  <a
+                    href={solution.link}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="px-4 py-3 rounded-xl text-base font-semibold bg-primary text-on-primary hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2"
+                  >
+                    <ExternalLink size={16} /> Acessar solução
+                  </a>
+                )}
+                {solution.demoLink && (
+                  <a
+                    href={solution.demoLink}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="px-4 py-3 rounded-xl text-base font-semibold bg-surface-container-high border border-outline-variant/30 text-on-surface hover:border-primary/50 transition-colors inline-flex items-center justify-center gap-2"
+                  >
+                    <Share2 size={16} /> Acessar demo
+                  </a>
+                )}
+                {solution.documentationLink && (
+                  <a
+                    href={solution.documentationLink}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="px-4 py-3 rounded-xl text-base font-semibold bg-surface-container-high border border-outline-variant/30 text-on-surface hover:border-primary/50 transition-colors inline-flex items-center justify-center gap-2"
+                  >
+                    <ExternalLink size={16} /> Ver documentação
+                  </a>
+                )}
+              </div>
+            </section>
+
+            {(solution.problemTypes.length > 0 ||
+              solution.impactTypes.length > 0 ||
+              solution.tags.length > 0 ||
+              solution.observacoes) && (
+              <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low/40 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsDetailsOpen((prev) => !prev)}
+                  className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-surface-container-low/60 transition-colors"
+                >
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-on-surface">Detalhes técnicos</h4>
+                  <ChevronDown
+                    size={18}
+                    className={`text-on-surface-variant transition-transform ${isDetailsOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {isDetailsOpen && (
+                  <div className="border-t border-outline-variant/15 p-4 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {solution.problemTypes.length > 0 && (
+                        <div>
+                          <p className="text-xs font-label uppercase tracking-wider text-on-surface-variant mb-2">
+                            Tipo de problema
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {solution.problemTypes.map((item) => (
+                              <span
+                                key={`problem-${item}`}
+                                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-container-high border border-outline-variant/15 text-on-surface-variant"
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {solution.impactTypes.length > 0 && (
+                        <div>
+                          <p className="text-xs font-label uppercase tracking-wider text-on-surface-variant mb-2">
+                            Tipo de impacto
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {solution.impactTypes.map((item) => (
+                              <span
+                                key={`impact-${item}`}
+                                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20"
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {solution.tags.length > 0 && (
+                        <div>
+                          <p className="text-xs font-label uppercase tracking-wider text-on-surface-variant mb-2">Tags</p>
+                          <div className="flex flex-wrap gap-2">
+                            {solution.tags.map((item) => (
+                              <span
+                                key={`tag-${item}`}
+                                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {solution.observacoes && (
+                      <div className="rounded-xl border border-outline-variant/15 bg-surface-container-low p-4">
+                        <p className="text-xs font-label uppercase tracking-wider text-on-surface-variant mb-2">
+                          Observações
+                        </p>
+                        <p className="text-sm text-on-surface leading-relaxed">{solution.observacoes}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </section>
             )}
 
-            <div className="flex items-center gap-4 pt-4">
+            <div className="pt-2 mb-6 md:mb-10">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-grow bg-primary text-on-primary font-bold py-4 rounded-2xl transition-all hover:opacity-90 active:scale-[0.98] shadow-xl shadow-primary/20"
+                className="w-full bg-primary text-on-primary font-bold py-3 rounded-xl transition-all hover:opacity-90 active:scale-[0.98] shadow-lg shadow-primary/20"
               >
                 Fechar
               </button>
-              {cta ? (
-                <a
-                  href={cta.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className={`px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 ${
-                    cta.kind === 'demo'
-                      ? 'bg-surface-container-high border border-outline-variant/45 text-on-surface shadow-sm hover:border-primary/50 hover:bg-primary/10'
-                      : 'bg-surface-container-highest text-on-surface hover:bg-outline-variant/30'
-                  }`}
-                >
-                  {cta.kind === 'demo' ? <Share2 size={18} /> : <ExternalLink size={18} />}
-                  {cta.label}
-                </a>
-              ) : null}
             </div>
           </div>
         </div>

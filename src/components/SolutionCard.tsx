@@ -66,9 +66,9 @@ export const SolutionCard: FC<SolutionCardProps> = ({
         </div>
         <div className="bg-background/40 p-4 rounded-xl">
           <p className="text-xs font-label uppercase text-on-surface-variant tracking-wider mb-2">
-            Impacto Principal
+            O que é
           </p>
-          <p className="text-sm text-on-surface leading-snug">{solution.impact}</p>
+          <p className="text-sm text-on-surface leading-snug">{solution.oQueE || solution.impact}</p>
         </div>
       </div>
 

@@ -201,10 +201,18 @@ function mapRowToSolution(row: CsvRow, index: number): Solution {
   const problemSolved = row.problema_resolvido?.trim() || undefined;
   const problemTypes = splitMultiValue(row.tipo_problema ?? '');
   const impact = row.impacto_principal?.trim() || 'Impacto não informado';
+  const resultadoEsperado = row.resultado_esperado?.trim() || impact;
+  const oQueE =
+    row.o_que_e?.trim() ||
+    row.observacoes?.trim() ||
+    row.problema_resolvido?.trim() ||
+    'Descrição não informada.';
+  const quandoUsar = splitMultiValue(row.quando_usar ?? '');
+  const comoUsar = row.como_usar?.trim() || undefined;
   const impactTypes = splitMultiValue(row.tipo_impacto ?? '');
   const tags = splitMultiValue(row.tags ?? '');
-  const description =
-    row.observacoes?.trim() || row.problema_resolvido?.trim() || 'Descrição não informada.';
+  const observacoes = row.observacoes?.trim() || undefined;
+  const description = oQueE;
   const link = row.link_acesso?.trim() || undefined;
   const demoLink = row.link_demo?.trim() || undefined;
   const documentationLink = row.link_documentacao?.trim() || undefined;
@@ -222,6 +230,11 @@ function mapRowToSolution(row: CsvRow, index: number): Solution {
     category,
     status,
     responsible,
+    oQueE,
+    quandoUsar,
+    resultadoEsperado,
+    comoUsar,
+    observacoes,
     problemSolved,
     problemTypes,
     impact,

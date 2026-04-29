@@ -168,10 +168,14 @@ export default function App() {
     const searchableText = normalizeSearch(
       [
         s.title,
+        s.oQueE,
+        s.resultadoEsperado,
+        s.comoUsar,
         s.impact,
         s.description,
         s.responsible,
         s.category,
+        s.quandoUsar.join(' '),
         s.tags.join(' '),
         s.problemTypes.join(' '),
         s.impactTypes.join(' '),
@@ -528,8 +532,8 @@ export default function App() {
                 </div>
               </section>
 
-              <div className="flex flex-col xl:flex-row gap-8">
-                <div className="flex-grow space-y-8">
+              <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_290px] gap-6 xl:gap-8 items-start">
+                <div className="min-w-0 space-y-8">
                   {!isLoadingSolutions && solutions.length === 0 && (
                     <div className="rounded-2xl border border-outline-variant/20 bg-surface-container p-5 text-sm text-on-surface-variant">
                       Nenhuma solução disponível na planilha no momento.
@@ -550,12 +554,12 @@ export default function App() {
                   ) : (
                     <AnimatePresence mode="wait">
                       {viewMode === 'grid' ? (
-                        <motion.div
+                      <motion.div
                           key="grid"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
                         >
                           {filteredSolutions.map((solution, index) => (
                             <SolutionCard
@@ -590,7 +594,7 @@ export default function App() {
                   )}
                 </div>
 
-                <aside className="w-full xl:w-80 space-y-6">
+                <aside className="w-full xl:max-w-[290px] space-y-6">
                   <div className="bg-surface-container p-6 rounded-2xl border border-outline-variant/10">
                     <h4 className="text-sm font-bold text-on-surface mb-4">Destaques úteis</h4>
                     <div className="space-y-3">
