@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
+  ArrowUp,
   ChevronDown,
   Grid,
   List as ListIcon,
@@ -37,6 +38,7 @@ export default function App() {
   const KNOWN_SOLUTIONS_STORAGE_KEY = 'known-solution-ids';
   const UNREAD_SOLUTIONS_STORAGE_KEY = 'unread-solution-ids';
   const ONBOARDING_SEEN_STORAGE_KEY = 'onboarding-seen-v1';
+  const ITEMS_PER_PAGE = 6;
 
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme');
@@ -55,6 +57,8 @@ export default function App() {
   const [responsibleFilter, setResponsibleFilter] = useState<string>('Todos');
   const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
   const [unreadNotificationIds, setUnreadNotificationIds] = useState<string[]>([]);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -135,6 +139,19 @@ export default function App() {
     localStorage.setItem(UNREAD_SOLUTIONS_STORAGE_KEY, JSON.stringify(nextUnreadIds));
   }, [solutions]);
 
+  useEffect(() => {
+    const toggleBackToTopVisibility = () => {
+      setShowBackToTop(window.scrollY > 320);
+    };
+
+    window.addEventListener('scroll', toggleBackToTopVisibility, { passive: true });
+    toggleBackToTopVisibility();
+
+    return () => {
+      window.removeEventListener('scroll', toggleBackToTopVisibility);
+    };
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
@@ -190,6 +207,22 @@ export default function App() {
 
     return matchesStatus && matchesSearch && matchesCategory && matchesResponsible;
   });
+  const totalPages = Math.max(1, Math.ceil(filteredSolutions.length / ITEMS_PER_PAGE));
+  const paginatedSolutions = filteredSolutions.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, categoryFilter, responsibleFilter, searchQuery, activeTab]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const totalSolutions = solutions.length;
   const emUsoCount = solutions.filter((s) => s.status === 'Em uso').length;
   const emDesenvolvimentoCount = solutions.filter((s) => s.status === 'Em desenvolvimento').length;
@@ -208,6 +241,49 @@ export default function App() {
   const markNotificationsAsViewed = () => {
     setUnreadNotificationIds([]);
     localStorage.setItem(UNREAD_SOLUTIONS_STORAGE_KEY, JSON.stringify([]));
+  };
+
+  const handleBackToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPagination = () => {
+    if (filteredSolutions.length <= ITEMS_PER_PAGE) return null;
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-outline-variant/20 bg-surface-container/60 px-4 py-3">
+        <p className="text-sm text-on-surface-variant">
+          Página <span className="font-semibold text-on-surface">{currentPage}</span> de{' '}
+          <span className="font-semibold text-on-surface">{totalPages}</span>
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
+              currentPage === 1
+                ? 'border-outline-variant/10 text-on-surface-variant/60 cursor-not-allowed'
+                : 'border-outline-variant/30 text-on-surface hover:border-primary/50 hover:text-primary'
+            }`}
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
+              currentPage === totalPages
+                ? 'border-outline-variant/10 text-on-surface-variant/60 cursor-not-allowed'
+                : 'border-outline-variant/30 text-on-surface hover:border-primary/50 hover:text-primary'
+            }`}
+          >
+            Próxima
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const unreadNotifications = solutions.filter((solution) => unreadNotificationIds.includes(solution.id));
@@ -454,7 +530,7 @@ export default function App() {
         onStartOnboarding={startOnboarding}
       />
 
-      <main className="mt-24 px-8 max-w-[1600px] mx-auto w-full flex-grow">
+      <main className="mt-24 px-8 max-w-[1600px] mx-auto w-full">
         {isLoadingSolutions && solutions.length > 0 && (
           <div className="mb-4 rounded-xl border border-outline-variant/20 bg-surface-container p-3 text-sm text-on-surface-variant">
             Carregando soluções da planilha...
@@ -561,7 +637,7 @@ export default function App() {
                           exit={{ opacity: 0 }}
                         className="grid grid-cols-1 md:grid-cols-2 gap-6"
                         >
-                          {filteredSolutions.map((solution, index) => (
+                          {paginatedSolutions.map((solution, index) => (
                             <SolutionCard
                               key={solution.id}
                               solution={solution}
@@ -579,7 +655,7 @@ export default function App() {
                           exit={{ opacity: 0 }}
                           className="flex flex-col gap-3"
                         >
-                          {filteredSolutions.map((solution, index) => (
+                          {paginatedSolutions.map((solution, index) => (
                             <SolutionListRow
                               key={solution.id}
                               solution={solution}
@@ -592,6 +668,8 @@ export default function App() {
                       )}
                     </AnimatePresence>
                   )}
+
+                  {renderPagination()}
                 </div>
 
                 <aside className="w-full xl:max-w-[290px] space-y-6">
@@ -653,19 +731,20 @@ export default function App() {
               transition={{ duration: 0.3 }}
             >
               <SolutionsCatalog
-                solutions={filteredSolutions}
+                solutions={paginatedSolutions}
                 viewMode={viewMode}
                 onLearnMore={setSelectedSolution}
                 responsibleLinks={responsibleLinks}
                 filtersSlot={renderFilters(true)}
               />
+              {renderPagination()}
             </motion.div>
           )}
 
         </AnimatePresence>
       </main>
 
-      <footer className="w-full py-12 mt-20 border-t border-outline-variant/10 bg-background">
+      <footer className="w-full py-12 mt-10 border-t border-outline-variant/10 bg-background">
         <div className="flex justify-center items-center px-12 max-w-[1600px] mx-auto gap-8">
           <div className="flex flex-col items-center text-center gap-2">
             <span className="text-on-surface font-semibold">Portfólio de Soluções Digitais</span>
@@ -683,6 +762,24 @@ export default function App() {
             onClose={() => setSelectedSolution(null)}
             responsibleLinks={responsibleLinks}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showBackToTop && !selectedSolution && (
+          <motion.button
+            type="button"
+            onClick={handleBackToTop}
+            initial={{ opacity: 0, y: 12, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-6 right-6 z-40 h-11 w-11 rounded-full bg-primary text-on-primary shadow-lg shadow-primary/30 hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            aria-label="Voltar ao topo"
+            title="Voltar ao topo"
+          >
+            <ArrowUp size={20} className="mx-auto" />
+          </motion.button>
         )}
       </AnimatePresence>
     </div>
