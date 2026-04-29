@@ -257,6 +257,8 @@ export default function App() {
         tooltipClass: 'portfolio-intro-tooltip',
         highlightClass: 'portfolio-intro-highlight',
         disableInteraction: true,
+        exitOnOverlayClick: false,
+        exitOnEsc: false,
         overlayOpacity: 0.65,
         scrollToElement: true,
         steps: [
