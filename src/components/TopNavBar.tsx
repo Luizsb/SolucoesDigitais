@@ -133,7 +133,7 @@ export function TopNavBar({
               type="button"
               onClick={onStartOnboarding}
               data-tour="tour"
-              className="hidden xs:block p-1.5 sm:p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
+              className="p-1.5 sm:p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
               title="Iniciar tour guiado"
             >
               <CircleHelp size={18} className="sm:w-5 sm:h-5" />
