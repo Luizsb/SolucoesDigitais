@@ -59,6 +59,27 @@ npm run dev
 
 Aplicação local: `http://localhost:3000`
 
+### Backend temporário de IA (teste)
+
+Em outro terminal, execute:
+
+```bash
+npm run dev:api
+```
+
+API local: `http://localhost:8787` (rota de saúde: `/api/health`).
+
+Para usar Ollama na revisão final:
+
+```bash
+ollama serve
+ollama pull qwen2.5:14b
+# opcional: forçar modelo
+set OLLAMA_MODEL=qwen2.5:14b
+```
+
+Sem Ollama ativo ou sem modelo instalado, a revisão com IA retorna erro e não aplica sugestões automáticas.
+
 ## Build e validação
 
 ```bash

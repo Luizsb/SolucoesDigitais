@@ -23,8 +23,20 @@ import { KPICard } from './components/KPICard';
 import { SolutionCard } from './components/SolutionCard';
 import { SolutionListRow } from './components/SolutionListRow';
 import { SolutionModal } from './components/SolutionModal';
+import { SolutionSubmissionForm } from './components/SolutionSubmissionForm';
 import { SolutionsCatalog } from './components/SolutionsCatalog';
 import { TopNavBar } from './components/TopNavBar';
+import { LoginPage } from './components/LoginPage';
+
+const getInitialTheme = (): Theme => {
+  const saved = localStorage.getItem('theme');
+  if (saved) return saved as Theme;
+  
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    return 'light';
+  }
+  return 'dark';
+};
 
 declare global {
   interface Window {
@@ -38,11 +50,17 @@ export default function App() {
   const KNOWN_SOLUTIONS_STORAGE_KEY = 'known-solution-ids';
   const UNREAD_SOLUTIONS_STORAGE_KEY = 'unread-solution-ids';
   const ONBOARDING_SEEN_STORAGE_KEY = 'onboarding-seen-v1';
+  const AUTH_STORAGE_KEY = 'user-session';
   const ITEMS_PER_PAGE = 6;
 
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme');
-    return (saved as Theme) || 'dark';
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return !!localStorage.getItem(AUTH_STORAGE_KEY);
+  });
+
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    return localStorage.getItem(AUTH_STORAGE_KEY) || '';
   });
 
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -245,6 +263,18 @@ export default function App() {
 
   const handleBackToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogin = (email: string) => {
+    setIsAuthenticated(true);
+    setUserEmail(email);
+    localStorage.setItem(AUTH_STORAGE_KEY, email);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setUserEmail('');
+    localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
   const renderPagination = () => {
@@ -518,242 +548,282 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <TopNavBar
-        theme={theme}
-        toggleTheme={toggleTheme}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        unreadNotifications={unreadNotifications}
-        onMarkNotificationsViewed={markNotificationsAsViewed}
-        onStartOnboarding={startOnboarding}
-      />
+      <AnimatePresence mode="wait">
+        {!isAuthenticated ? (
+          <motion.div
+            key="login"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <LoginPage onLogin={handleLogin} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="app-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col min-h-screen"
+          >
+            <TopNavBar
+              theme={theme}
+              toggleTheme={toggleTheme}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              unreadNotifications={unreadNotifications}
+              onMarkNotificationsViewed={markNotificationsAsViewed}
+              onStartOnboarding={startOnboarding}
+              onOpenSubmission={() => {
+                setActiveTab('submission');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onLogout={handleLogout}
+              userEmail={userEmail}
+            />
 
-      <main className="mt-24 px-8 max-w-[1600px] mx-auto w-full">
-        {isLoadingSolutions && solutions.length > 0 && (
-          <div className="mb-4 rounded-xl border border-outline-variant/20 bg-surface-container p-3 text-sm text-on-surface-variant">
-            Carregando soluções da planilha...
-          </div>
-        )}
-        {solutionsError && (
-          <div className="mb-4 rounded-xl border border-tertiary/20 bg-tertiary/10 p-3 text-sm text-on-surface">
-            {solutionsError}
-          </div>
-        )}
+            <main className="mt-20 sm:mt-24 px-4 sm:px-8 max-w-[1600px] mx-auto w-full flex-grow">
+              {isLoadingSolutions && solutions.length > 0 && (
+                <div className="mb-4 rounded-xl border border-outline-variant/20 bg-surface-container p-3 text-sm text-on-surface-variant">
+                  Carregando soluções da planilha...
+                </div>
+              )}
+              {solutionsError && (
+                <div className="mb-4 rounded-xl border border-tertiary/20 bg-tertiary/10 p-3 text-sm text-on-surface">
+                  {solutionsError}
+                </div>
+              )}
 
-        <AnimatePresence mode="wait">
-          {activeTab === 'dashboard' && (
-            <motion.div
-              key="dashboard"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <section className="mb-12">
-                <div className="flex flex-col lg:flex-row justify-between items-end gap-8 mb-12">
-                  <div className="max-w-2xl">
-                    <motion.p
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="text-xs font-label uppercase tracking-widest text-primary font-bold mb-3"
-                    >
-                      Dashboard
-                    </motion.p>
-                    <motion.h1
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.05 }}
-                      className="text-5xl font-bold tracking-tight mb-4 text-on-surface"
-                    >
-                      Visão geral
-                    </motion.h1>
-                    <motion.p
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="text-on-surface-variant text-lg leading-relaxed"
-                    >
-                      Nossa missão é transformar conhecimento interno em soluções digitais reutilizáveis,
-                      conectando pessoas, processos e tecnologia para elevar a qualidade, acelerar entregas e
-                      gerar impacto real no dia a dia da operação.
-                    </motion.p>
-                  </div>
-
+              <AnimatePresence mode="wait">
+                {activeTab === 'dashboard' && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full lg:w-auto"
+                    key="dashboard"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <KPICard label="Total Iniciativas" value={String(totalSolutions).padStart(2, '0')} />
-                    <KPICard
-                      label="Em uso"
-                      value={String(emUsoCount).padStart(2, '0')}
-                      colorClass="text-secondary"
-                      showPulse={emUsoCount > 0}
-                    />
-                    <KPICard
-                      label="Desenvolvimento"
-                      value={String(emDesenvolvimentoCount).padStart(2, '0')}
-                      colorClass="text-primary"
-                    />
-                    <KPICard
-                      label="Piloto"
-                      value={String(pilotoCount).padStart(2, '0')}
-                      colorClass="text-tertiary"
-                    />
-                  </motion.div>
-                </div>
-              </section>
-
-              <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_290px] gap-6 xl:gap-8 items-start">
-                <div className="min-w-0 space-y-8">
-                  {!isLoadingSolutions && solutions.length === 0 && (
-                    <div className="rounded-2xl border border-outline-variant/20 bg-surface-container p-5 text-sm text-on-surface-variant">
-                      Nenhuma solução disponível na planilha no momento.
-                    </div>
-                  )}
-                  {renderFilters(true)}
-
-                  {isLoadingSolutions && solutions.length === 0 ? (
-                    <div className="rounded-2xl border border-outline-variant/20 bg-surface-container/60 p-8 text-center">
-                      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <LoaderCircle className="animate-spin" size={28} />
-                      </div>
-                      <h2 className="text-xl font-semibold text-on-surface">Carregando cadastros...</h2>
-                      <p className="mt-2 text-sm text-on-surface-variant">
-                        Estamos buscando os dados da planilha. Isso pode levar alguns segundos.
-                      </p>
-                    </div>
-                  ) : (
-                    <AnimatePresence mode="wait">
-                      {viewMode === 'grid' ? (
-                      <motion.div
-                          key="grid"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                        >
-                          {paginatedSolutions.map((solution, index) => (
-                            <SolutionCard
-                              key={solution.id}
-                              solution={solution}
-                              onLearnMore={setSelectedSolution}
-                              responsibleLinks={responsibleLinks}
-                              isTourTarget={index === 0}
-                            />
-                          ))}
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="list"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex flex-col gap-3"
-                        >
-                          {paginatedSolutions.map((solution, index) => (
-                            <SolutionListRow
-                              key={solution.id}
-                              solution={solution}
-                              onLearnMore={setSelectedSolution}
-                              responsibleLinks={responsibleLinks}
-                              isTourTarget={index === 0}
-                            />
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  )}
-
-                  {renderPagination()}
-                </div>
-
-                <aside className="w-full xl:max-w-[290px] space-y-6">
-                  <div className="bg-surface-container p-6 rounded-2xl border border-outline-variant/10">
-                    <h4 className="text-sm font-bold text-on-surface mb-4">Destaques úteis</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-on-surface-variant">Resultados com filtros atuais</span>
-                        <span className="font-bold text-on-surface">{filteredSolutions.length}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-on-surface-variant">Soluções com demo</span>
-                        <span className="font-bold text-secondary">{withDemoCount}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-on-surface-variant">Sem links de acesso</span>
-                        <span className="font-bold text-tertiary">{withoutLinksCount}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-primary/5 via-background to-background p-5 rounded-2xl border border-primary/25">
-                    <div className="flex flex-col items-center text-center gap-3">
-                      <div className="w-20 h-20 relative shrink-0 group">
-                        <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl group-hover:bg-primary/20 transition-all duration-500" />
-                        <img
-                          src={mascoteOficial}
-                          alt="Quack, personagem da plataforma"
-                          title="Quá-quá"
-                          className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
-                        />
-                      </div>
-                      <div className="w-full">
-                        <div className="relative bg-surface-container-high rounded-xl border border-primary/20 shadow-lg shadow-black/20 px-4 py-3 text-left">
-                          <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-surface-container-high border-l border-t border-primary/20" />
-                          <h4 className="text-sm font-bold text-primary mb-1">
-                            Sua solução ainda não está no portfólio?
-                          </h4>
-                          <p className="text-xs text-on-surface-variant leading-relaxed">
-                            Se você já usa uma solução no dia a dia e ela ainda não aparece no portfólio,
-                            clique em <strong>Nova solução</strong> para cadastrar. O time avalia e publica
-                            na base oficial.
-                          </p>
+                    <section className="mb-8 sm:mb-12">
+                      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 lg:gap-8 mb-6 sm:mb-10">
+                        <div className="max-w-2xl">
+                          <motion.p
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="text-[10px] sm:text-xs font-label uppercase tracking-widest text-primary font-bold mb-2 sm:mb-3"
+                          >
+                            Dashboard
+                          </motion.p>
+                          <motion.h1
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.05 }}
+                            className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-2 sm:mb-4 text-on-surface"
+                          >
+                            Visão geral
+                          </motion.h1>
+                          <motion.p
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="text-on-surface-variant text-xs sm:text-base lg:text-lg leading-relaxed"
+                          >
+                            Nossa missão é transformar conhecimento interno em soluções digitais reutilizáveis,
+                            conectando pessoas, processos e tecnologia para elevar a qualidade, acelerar entregas e
+                            gerar impacto real no dia a dia da operação.
+                          </motion.p>
                         </div>
+
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.2 }}
+                          className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4 w-full xl:w-auto items-stretch self-start lg:self-auto lg:-translate-y-4"
+                        >
+                          <KPICard label="Total Iniciativas" value={String(totalSolutions).padStart(2, '0')} />
+                          <KPICard
+                            label="Em uso"
+                            value={String(emUsoCount).padStart(2, '0')}
+                            colorClass="text-secondary"
+                            showPulse={emUsoCount > 0}
+                          />
+                          <KPICard
+                            label="Desenvolvimento"
+                            value={String(emDesenvolvimentoCount).padStart(2, '0')}
+                            colorClass="text-primary"
+                          />
+                          <KPICard
+                            label="Piloto"
+                            value={String(pilotoCount).padStart(2, '0')}
+                            colorClass="text-tertiary"
+                          />
+                        </motion.div>
                       </div>
+                    </section>
+
+                    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_290px] gap-6 xl:gap-8 items-start">
+                      <div className="min-w-0 space-y-8">
+                        {!isLoadingSolutions && solutions.length === 0 && (
+                          <div className="rounded-2xl border border-outline-variant/20 bg-surface-container p-5 text-sm text-on-surface-variant">
+                            Nenhuma solução disponível na planilha no momento.
+                          </div>
+                        )}
+                        {renderFilters(true)}
+
+                        {isLoadingSolutions && solutions.length === 0 ? (
+                          <div className="rounded-2xl border border-outline-variant/20 bg-surface-container/60 p-8 text-center">
+                            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                              <LoaderCircle className="animate-spin" size={28} />
+                            </div>
+                            <h2 className="text-xl font-semibold text-on-surface">Carregando cadastros...</h2>
+                            <p className="mt-2 text-sm text-on-surface-variant">
+                              Estamos buscando os dados da planilha. Isso pode levar alguns segundos.
+                            </p>
+                          </div>
+                        ) : (
+                          <AnimatePresence mode="wait">
+                            {viewMode === 'grid' ? (
+                            <motion.div
+                                key="grid"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                              >
+                                {paginatedSolutions.map((solution, index) => (
+                                  <SolutionCard
+                                    key={solution.id}
+                                    solution={solution}
+                                    onLearnMore={setSelectedSolution}
+                                    responsibleLinks={responsibleLinks}
+                                    isTourTarget={index === 0}
+                                  />
+                                ))}
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                key="list"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex flex-col gap-3"
+                              >
+                                {paginatedSolutions.map((solution, index) => (
+                                  <SolutionListRow
+                                    key={solution.id}
+                                    solution={solution}
+                                    onLearnMore={setSelectedSolution}
+                                    responsibleLinks={responsibleLinks}
+                                    isTourTarget={index === 0}
+                                  />
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        )}
+
+                        {renderPagination()}
+                      </div>
+
+                      <aside className="w-full xl:max-w-[290px] space-y-6">
+                        <div className="bg-surface-container p-6 rounded-2xl border border-outline-variant/10">
+                          <h4 className="text-sm font-bold text-on-surface mb-4">Destaques úteis</h4>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-on-surface-variant">Resultados com filtros atuais</span>
+                              <span className="font-bold text-on-surface">{filteredSolutions.length}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-on-surface-variant">Soluções com demo</span>
+                              <span className="font-bold text-secondary">{withDemoCount}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-on-surface-variant">Sem links de acesso</span>
+                              <span className="font-bold text-tertiary">{withoutLinksCount}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-primary/5 via-background to-background p-5 rounded-2xl border border-primary/25">
+                          <div className="flex flex-col items-center text-center gap-3">
+                            <div className="w-20 h-20 relative shrink-0 group">
+                              <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl group-hover:bg-primary/20 transition-all duration-500" />
+                              <img
+                                src={mascoteOficial}
+                                alt="Quack, personagem da plataforma"
+                                title="Quá-quá"
+                                className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
+                              />
+                            </div>
+                            <div className="w-full">
+                              <div className="relative bg-surface-container-high rounded-xl border border-primary/20 shadow-lg shadow-black/20 px-4 py-3 text-left">
+                                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-surface-container-high border-l border-t border-primary/20" />
+                                <h4 className="text-sm font-bold text-primary mb-1">
+                                  Sua solução ainda não está no portfólio?
+                                </h4>
+                                <p className="text-xs text-on-surface-variant leading-relaxed">
+                                  Se você já usa uma solução no dia a dia e ela ainda não aparece no portfólio,
+                                  clique em <strong>Nova solução</strong> para cadastrar. O time avalia e publica
+                                  na base oficial.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </aside>
                     </div>
-                  </div>
-                </aside>
+                  </motion.div>
+                )}
+
+                {activeTab === 'solutions' && (
+                  <motion.div
+                    key="solutions"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <SolutionsCatalog
+                      solutions={paginatedSolutions}
+                      viewMode={viewMode}
+                      onLearnMore={setSelectedSolution}
+                      responsibleLinks={responsibleLinks}
+                      filtersSlot={renderFilters(true)}
+                    />
+                    {renderPagination()}
+                  </motion.div>
+                )}
+
+                {activeTab === 'submission' && (
+                  <motion.div
+                    key="submission"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <SolutionSubmissionForm onCancel={() => setActiveTab('dashboard')} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </main>
+
+            <footer className="w-full py-12 mt-10 border-t border-outline-variant/10 bg-background">
+              <div className="flex justify-center items-center px-12 max-w-[1600px] mx-auto gap-8">
+                <div className="flex flex-col items-center text-center gap-2">
+                  <span className="text-on-surface font-semibold">Portfólio de Soluções Digitais</span>
+                  <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">
+                    © 2026. INTERAÇÕES DIGITAIS.
+                  </span>
+                </div>
               </div>
-            </motion.div>
-          )}
-
-          {activeTab === 'solutions' && (
-            <motion.div
-              key="solutions"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              <SolutionsCatalog
-                solutions={paginatedSolutions}
-                viewMode={viewMode}
-                onLearnMore={setSelectedSolution}
-                responsibleLinks={responsibleLinks}
-                filtersSlot={renderFilters(true)}
-              />
-              {renderPagination()}
-            </motion.div>
-          )}
-
-        </AnimatePresence>
-      </main>
-
-      <footer className="w-full py-12 mt-10 border-t border-outline-variant/10 bg-background">
-        <div className="flex justify-center items-center px-12 max-w-[1600px] mx-auto gap-8">
-          <div className="flex flex-col items-center text-center gap-2">
-            <span className="text-on-surface font-semibold">Portfólio de Soluções Digitais</span>
-            <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">
-              © 2026. INTERAÇÕES DIGITAIS.
-            </span>
-          </div>
-        </div>
-      </footer>
+            </footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {selectedSolution && (
@@ -766,7 +836,7 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showBackToTop && !selectedSolution && (
+        {showBackToTop && !selectedSolution && isAuthenticated && (
           <motion.button
             type="button"
             onClick={handleBackToTop}

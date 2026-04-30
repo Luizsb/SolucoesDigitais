@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Bell, CircleHelp, Moon, Plus, Search, Sun, X } from 'lucide-react';
+import { Bell, CircleHelp, LogOut, Moon, Plus, Search, Sun, User, X } from 'lucide-react';
 import brandIcon from '../assets/brand-icon.svg';
 import type { Solution, Tab, Theme } from '../types/solution';
 
@@ -14,6 +14,9 @@ type TopNavBarProps = {
   unreadNotifications: Solution[];
   onMarkNotificationsViewed: () => void;
   onStartOnboarding: () => void;
+  onOpenSubmission: () => void;
+  onLogout: () => void;
+  userEmail?: string;
 };
 
 export function TopNavBar({
@@ -26,6 +29,9 @@ export function TopNavBar({
   unreadNotifications,
   onMarkNotificationsViewed,
   onStartOnboarding,
+  onOpenSubmission,
+  onLogout,
+  userEmail,
 }: TopNavBarProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
@@ -38,26 +44,26 @@ export function TopNavBar({
 
   return (
     <nav className="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/15 shadow-2xl shadow-black/20">
-      <div className="flex justify-between items-center w-full px-8 py-4 mx-auto max-w-[1600px]">
-        <div className="flex items-center gap-8">
+      <div className="flex justify-between items-center w-full px-4 sm:px-8 py-3 sm:py-4 mx-auto max-w-[1600px] gap-4">
+        <div className="flex items-center gap-4 sm:gap-8 min-w-0">
           <button
             type="button"
             onClick={() => {
               setActiveTab('dashboard');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="flex items-center gap-3 min-w-0 text-left rounded-xl -m-1 p-1 pr-2 transition-colors hover:bg-surface-container-high/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            className="flex items-center gap-2 sm:gap-3 min-w-0 text-left rounded-xl -m-1 p-1 pr-2 transition-colors hover:bg-surface-container-high/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
             title="Ir para o início (Dashboard)"
           >
             <img
               src={brandIcon}
-              width={32}
-              height={32}
+              width={28}
+              height={28}
               alt=""
-              className="rounded-lg shadow-sm shadow-primary/10 shrink-0"
+              className="sm:w-8 sm:h-8 rounded-lg shadow-sm shadow-primary/10 shrink-0"
               aria-hidden
             />
-            <span className="text-xl font-bold tracking-tight text-on-surface truncate">
+            <span className="text-lg sm:text-xl font-bold tracking-tight text-on-surface truncate">
               Portfólio de Soluções Digitais
             </span>
           </button>
@@ -88,8 +94,8 @@ export function TopNavBar({
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="relative group hidden lg:block">
+        <div className="flex items-center gap-2 sm:gap-6 shrink-0">
+          <div className="relative group hidden xl:block">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
               size={16}
@@ -113,42 +119,42 @@ export function TopNavBar({
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 sm:gap-4">
             <button
               type="button"
               onClick={toggleTheme}
               data-tour="tema"
-              className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
+              className="p-1.5 sm:p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
               title={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === 'dark' ? <Sun size={18} className="sm:w-5 sm:h-5" /> : <Moon size={18} className="sm:w-5 sm:h-5" />}
             </button>
             <button
               type="button"
               onClick={onStartOnboarding}
               data-tour="tour"
-              className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
+              className="hidden xs:block p-1.5 sm:p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95"
               title="Iniciar tour guiado"
             >
-              <CircleHelp size={20} />
+              <CircleHelp size={18} className="sm:w-5 sm:h-5" />
             </button>
             <div className="relative">
               <button
                 type="button"
                 onClick={handleToggleNotifications}
                 data-tour="notificacoes"
-                className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95 relative"
+                className="p-1.5 sm:p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all active:scale-95 relative"
                 title="Notificações"
               >
-                <Bell size={20} />
+                <Bell size={18} className="sm:w-5 sm:h-5" />
                 {unreadNotifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-on-primary text-[10px] font-bold flex items-center justify-center">
+                  <span className="absolute top-0 right-0 sm:-top-1 sm:-right-1 min-w-4 h-4 sm:min-w-5 sm:h-5 px-1 rounded-full bg-primary text-on-primary text-[9px] sm:text-[10px] font-bold flex items-center justify-center">
                     {unreadNotifications.length}
                   </span>
                 )}
               </button>
               {isNotificationOpen && (
-                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border border-outline-variant/20 bg-surface-container shadow-xl p-3 z-50">
+                <div className="absolute right-0 mt-2 w-72 sm:w-80 max-h-96 overflow-y-auto rounded-xl border border-outline-variant/20 bg-surface-container shadow-xl p-3 z-50">
                   <h4 className="text-sm font-semibold text-on-surface mb-2">Novos cadastros</h4>
                   {unreadNotifications.length === 0 ? (
                     <p className="text-xs text-on-surface-variant">Nenhuma novidade no momento.</p>
@@ -178,12 +184,23 @@ export function TopNavBar({
             </div>
             <button
               type="button"
-              onClick={() => window.open('https://forms.gle/crhfQ6vRp3pUCghDA', '_blank', 'noopener,noreferrer')}
+              onClick={onOpenSubmission}
               data-tour="nova-solucao"
-              className="bg-gradient-to-br from-primary to-primary-dim text-on-primary px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 transition-all shadow-lg shadow-primary/10 flex items-center gap-2"
+              className="bg-gradient-to-br from-primary to-primary-dim text-on-primary p-1.5 sm:px-4 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm active:scale-95 transition-all shadow-lg shadow-primary/10 flex items-center gap-2"
             >
               <Plus size={18} />
-              Nova solução
+              <span className="hidden sm:inline">Nova solução</span>
+            </button>
+
+            <div className="h-6 sm:h-8 w-px bg-outline-variant/20 mx-0.5 sm:mx-1" />
+
+            <button
+              type="button"
+              onClick={onLogout}
+              className="p-1.5 sm:p-2 text-on-surface-variant hover:bg-tertiary/10 hover:text-tertiary rounded-lg transition-all active:scale-95"
+              title="Sair da conta"
+            >
+              <LogOut size={18} className="sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>

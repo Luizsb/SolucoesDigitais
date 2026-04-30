@@ -16,5 +16,11 @@ export default defineConfig(({command}) => ({
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
     // Do not remove without checking AI Studio deployment.
     hmr: process.env.DISABLE_HMR !== 'true',
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8787',
+        changeOrigin: true,
+      },
+    },
   },
 }));
