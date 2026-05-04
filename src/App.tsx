@@ -426,7 +426,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (isLoadingSolutions || solutions.length === 0) return;
+    if (!isAuthenticated || isLoadingSolutions || solutions.length === 0) return;
     if (localStorage.getItem(ONBOARDING_SEEN_STORAGE_KEY) === 'true') return;
 
     const timer = window.setTimeout(() => {
@@ -435,7 +435,7 @@ export default function App() {
     }, 700);
 
     return () => window.clearTimeout(timer);
-  }, [isLoadingSolutions, solutions.length]);
+  }, [isAuthenticated, isLoadingSolutions, solutions.length]);
 
   const renderFilters = (showViewModeToggle: boolean) => (
     <div data-tour="filtros" className="flex flex-wrap items-center gap-4 bg-surface-container/50 p-2 rounded-2xl">
