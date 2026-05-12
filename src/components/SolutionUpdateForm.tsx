@@ -1,5 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import { CheckCircle2, CircleHelp, Edit3, Info, X } from 'lucide-react';
+import {
+  SOLUTION_STATUS_OPTION_TITLE,
+  SOLUTION_STATUS_ORDER,
+} from '../lib/solutionStatusFormCopy';
+import { StatusFieldLegend } from './StatusFieldLegend';
 import type { Solution } from '../types/solution';
 
 type SolutionUpdateFormProps = {
@@ -171,17 +176,24 @@ export function SolutionUpdateForm({ solution, onCancel }: SolutionUpdateFormPro
                 placeholder="Ex.: Nome 1; Nome 2"
               />
             </FormField>
-            <FormField label="Status *">
+            <div className="space-y-2 block">
+              <div className="inline-flex items-center gap-1.5 text-xs font-label uppercase tracking-wider text-on-surface-variant">
+                <label htmlFor="update-status">Status *</label>
+                <StatusFieldLegend />
+              </div>
               <select
+                id="update-status"
                 value={form.status}
                 onChange={(e) => updateField('status', e.target.value as FormData['status'])}
                 className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
-                <option value="Em uso">Em uso</option>
-                <option value="Em desenvolvimento">Em desenvolvimento</option>
-                <option value="Piloto">Piloto</option>
+                {SOLUTION_STATUS_ORDER.map((value) => (
+                  <option key={value} value={value} title={SOLUTION_STATUS_OPTION_TITLE[value]}>
+                    {value}
+                  </option>
+                ))}
               </select>
-            </FormField>
+            </div>
             <FormField label="Nível de maturidade *" className="md:col-span-2">
               <select
                 value={form.nivelMaturidade}

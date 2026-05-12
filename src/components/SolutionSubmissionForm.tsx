@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { CheckCircle2, CircleHelp, Info, Layers, Link, MessageSquare, Sparkles, X } from 'lucide-react';
+import {
+  SOLUTION_STATUS_OPTION_TITLE,
+  SOLUTION_STATUS_ORDER,
+} from '../lib/solutionStatusFormCopy';
+import { StatusFieldLegend } from './StatusFieldLegend';
 
 type SolutionSubmissionFormProps = {
   onCancel: () => void;
@@ -386,17 +391,24 @@ export function SolutionSubmissionForm({ onCancel }: SolutionSubmissionFormProps
                 placeholder="Ex.: Nome 1; Nome 2"
               />
             </FormField>
-            <FormField label="Status *" hint="Situação atual da solução no ciclo de uso e evolução.">
+            <div className="space-y-2 block">
+              <div className="inline-flex items-center gap-1.5 text-xs font-label uppercase tracking-wider text-on-surface-variant">
+                <label htmlFor="submission-status">Status *</label>
+                <StatusFieldLegend />
+              </div>
               <select
+                id="submission-status"
                 value={form.status}
                 onChange={(e) => updateField('status', e.target.value as FormData['status'])}
                 className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
-                <option value="Em desenvolvimento">Em desenvolvimento</option>
-                <option value="Em uso">Em uso</option>
-                <option value="Piloto">Piloto</option>
+                {SOLUTION_STATUS_ORDER.map((value) => (
+                  <option key={value} value={value} title={SOLUTION_STATUS_OPTION_TITLE[value]}>
+                    {value}
+                  </option>
+                ))}
               </select>
-            </FormField>
+            </div>
             <FormField
               className="md:col-span-2"
               label="Nível de maturidade *"
