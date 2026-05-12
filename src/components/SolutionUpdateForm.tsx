@@ -114,11 +114,20 @@ export function SolutionUpdateForm({ solution, onCancel }: SolutionUpdateFormPro
   return (
     <div className="w-full space-y-8">
       <header className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
             <Edit3 size={14} />
             Sugestão de atualização
           </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="shrink-0 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container"
+            aria-label="Fechar"
+            title="Fechar"
+          >
+            <X size={22} strokeWidth={2} />
+          </button>
         </div>
         <h1 className="text-3xl font-bold text-on-surface">✏️ Sugerir atualização</h1>
         <p className="text-on-surface-variant">

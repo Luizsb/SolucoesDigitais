@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   ArrowUp,
   ChevronDown,
@@ -86,6 +86,7 @@ export default function App() {
   const [unreadNotificationIds, setUnreadNotificationIds] = useState<string[]>([]);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -711,22 +712,25 @@ export default function App() {
                           transition={{ delay: 0.2 }}
                           className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4 w-full xl:w-auto items-stretch self-start lg:self-auto lg:-translate-y-4"
                         >
-                          <KPICard label="Total Iniciativas" value={String(totalSolutions).padStart(2, '0')} />
+                          <KPICard label="Total Iniciativas" value={String(totalSolutions).padStart(2, '0')} staggerIndex={0} />
                           <KPICard
                             label="Em uso"
                             value={String(emUsoCount).padStart(2, '0')}
                             colorClass="text-secondary"
                             showPulse={emUsoCount > 0}
+                            staggerIndex={1}
                           />
                           <KPICard
                             label="Desenvolvimento"
                             value={String(emDesenvolvimentoCount).padStart(2, '0')}
                             colorClass="text-primary"
+                            staggerIndex={2}
                           />
                           <KPICard
                             label="Piloto"
                             value={String(pilotoCount).padStart(2, '0')}
                             colorClass="text-tertiary"
+                            staggerIndex={3}
                           />
                         </motion.div>
                       </div>
@@ -815,27 +819,56 @@ export default function App() {
                           </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-primary/5 via-background to-background p-5 rounded-2xl border border-primary/25">
-                          <div className="flex flex-col items-center text-center gap-3">
-                            <div className="w-20 h-20 relative shrink-0 group">
-                              <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl group-hover:bg-primary/20 transition-all duration-500" />
+                        <div className="relative overflow-hidden rounded-2xl border border-outline-variant/35 bg-surface-container-low/95 shadow-md shadow-black/[0.07] dark:border-outline-variant/45 dark:bg-surface-container-low/55 dark:shadow-black/25 p-5">
+                          <div className="relative z-10 flex flex-col items-center text-center gap-3">
+                            <motion.div
+                              className="w-[5.25rem] h-[5.25rem] sm:w-24 sm:h-24 relative shrink-0 group cursor-default"
+                              animate={{ y: reduceMotion ? 0 : [0, -6, 0] }}
+                              transition={
+                                reduceMotion
+                                  ? { duration: 0 }
+                                  : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }
+                              }
+                            >
+                              <div
+                                className="pointer-events-none absolute -inset-3 z-0 rounded-full mascot-duck-aura mascot-cta-glow"
+                                aria-hidden
+                              />
                               <img
                                 src={mascoteOficial}
                                 alt="Quack, personagem da plataforma"
                                 title="Quá-quá"
-                                className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
+                                className="w-full h-full object-contain relative z-10 drop-shadow-[0_6px_14px_rgba(0,102,139,0.35)] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 dark:drop-shadow-[0_6px_16px_rgba(59,191,250,0.25)]"
                               />
-                            </div>
+                            </motion.div>
                             <div className="w-full">
-                              <div className="relative bg-surface-container-high rounded-xl border border-primary/20 shadow-lg shadow-black/20 px-4 py-3 text-left">
-                                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-surface-container-high border-l border-t border-primary/20" />
-                                <h4 className="text-sm font-bold text-primary mb-1">
+                              <div className="relative bg-surface-container-high rounded-xl border border-outline-variant/45 shadow-sm shadow-black/[0.06] dark:shadow-black/20 px-4 py-3 text-left">
+                                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-surface-container-high border-l border-t border-outline-variant/45" />
+                                <h4
+                                  className={`text-sm font-extrabold mb-1 tracking-tight ${
+                                    theme === 'dark' ? 'text-[#3bbfed]' : 'text-on-surface'
+                                  }`}
+                                >
                                   Sua solução ainda não está no portfólio?
                                 </h4>
                                 <p className="text-xs text-on-surface-variant leading-relaxed">
                                   Se você já usa uma solução no dia a dia e ela ainda não aparece no portfólio,
-                                  clique em <strong>Nova solução</strong> para cadastrar. O time avalia e publica
-                                  na base oficial.
+                                  clique em{' '}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActiveTab('submission');
+                                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className={`font-semibold underline underline-offset-2 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container-high ${
+                                      theme === 'dark'
+                                        ? 'text-[#3bbfed] decoration-[#3bbfed]/55 hover:text-[#6dd4ff] hover:decoration-[#6dd4ff]/70 focus-visible:ring-[#3bbfed]/45'
+                                        : 'text-on-surface decoration-outline-variant/55 hover:bg-surface-container-highest/90 hover:decoration-on-surface focus-visible:ring-on-surface/30'
+                                    }`}
+                                  >
+                                    Nova solução
+                                  </button>{' '}
+                                  para cadastrar. O time avalia e publica na base oficial.
                                 </p>
                               </div>
                             </div>
@@ -897,6 +930,7 @@ export default function App() {
         {selectedSolution && (
           <SolutionModal
             solution={selectedSolution}
+            theme={theme}
             shareUrl={buildSolutionShareUrl(selectedSolution, solutions)}
             onClose={() => setSelectedSolution(null)}
             onSuggestUpdate={(s) => {

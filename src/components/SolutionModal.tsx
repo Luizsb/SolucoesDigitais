@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
+  AlertCircle,
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
@@ -13,7 +14,7 @@ import {
   Share2,
   X,
 } from 'lucide-react';
-import type { Solution } from '../types/solution';
+import type { Solution, Theme } from '../types/solution';
 import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
 import { solutionToMarkdown } from '../lib/solutionExportMarkdown';
 import { ResponsibleNames } from './ResponsibleNames';
@@ -25,6 +26,8 @@ type SolutionModalProps = {
   onClose: () => void;
   onSuggestUpdate: (s: Solution) => void;
   responsibleLinks: ResponsibleLinksMap;
+  /** Tema da app (evita depender só do variant `dark:` do Tailwind). */
+  theme: Theme;
 };
 
 export function SolutionModal({
@@ -33,9 +36,14 @@ export function SolutionModal({
   onClose,
   onSuggestUpdate,
   responsibleLinks,
+  theme,
 }: SolutionModalProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [copyHint, setCopyHint] = useState<string | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState<{
+    target: 'link' | 'markdown';
+    variant: 'success' | 'error';
+    text: string;
+  } | null>(null);
   const copyHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const responsibleList = solution.responsible
     .split(';')
@@ -70,34 +78,49 @@ export function SolutionModal({
     };
   }, []);
 
-  const showCopyHint = (message: string) => {
+  const showCopyFeedback = (target: 'link' | 'markdown', variant: 'success' | 'error', text: string) => {
     if (copyHintTimerRef.current) {
       clearTimeout(copyHintTimerRef.current);
     }
-    setCopyHint(message);
+    setCopyFeedback({ target, variant, text });
     copyHintTimerRef.current = setTimeout(() => {
-      setCopyHint(null);
+      setCopyFeedback(null);
       copyHintTimerRef.current = null;
-    }, 2800);
+    }, 2600);
   };
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      showCopyHint('Link copiado.');
+      showCopyFeedback('link', 'success', 'Copiado!');
     } catch {
-      showCopyHint('Não foi possível copiar o link.');
+      showCopyFeedback('link', 'error', 'Não foi possível copiar o link.');
     }
   };
 
   const handleCopyMarkdown = async () => {
     try {
       await navigator.clipboard.writeText(solutionToMarkdown(solution));
-      showCopyHint('Ficha em Markdown copiada.');
+      showCopyFeedback('markdown', 'success', 'Ficha copiada!');
     } catch {
-      showCopyHint('Não foi possível copiar a ficha.');
+      showCopyFeedback('markdown', 'error', 'Não foi possível copiar a ficha.');
     }
   };
+
+  const copySuccessOverlayClass =
+    theme === 'dark'
+      ? 'absolute inset-0 z-10 flex items-center justify-center gap-1.5 rounded-xl border-2 border-emerald-500 bg-neutral-950 px-2 text-xs font-semibold text-emerald-400 shadow-sm'
+      : 'absolute inset-0 z-10 flex items-center justify-center gap-1.5 rounded-xl border-2 border-emerald-600 bg-white px-2 text-xs font-semibold text-emerald-700 shadow-sm shadow-emerald-900/5';
+
+  const copyErrorOverlayClass =
+    theme === 'dark'
+      ? 'absolute inset-0 z-10 flex flex-col items-center justify-center gap-0.5 rounded-xl border-2 border-amber-500/90 bg-neutral-950 px-1.5 py-1 text-center text-[10px] font-semibold leading-snug text-amber-200 shadow-sm sm:text-[11px]'
+      : 'absolute inset-0 z-10 flex flex-col items-center justify-center gap-0.5 rounded-xl border-2 border-amber-500 bg-white px-1.5 py-1 text-center text-[10px] font-semibold leading-snug text-amber-900 shadow-sm sm:text-[11px]';
+
+  const copySuccessIconClass =
+    theme === 'dark' ? 'h-3.5 w-3.5 shrink-0 text-emerald-500' : 'h-3.5 w-3.5 shrink-0 text-emerald-600';
+  const copyErrorIconClass =
+    theme === 'dark' ? 'h-3.5 w-3.5 shrink-0 text-amber-400' : 'h-3.5 w-3.5 shrink-0 text-amber-600';
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-3 md:p-6 overflow-y-auto">
@@ -179,30 +202,73 @@ export function SolutionModal({
         </div>
 
         <div className="min-w-0 min-h-0 p-5 md:p-8 lg:p-10 pb-10 md:pb-14 overflow-visible md:overflow-y-auto custom-scrollbar">
-          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between pr-12 md:pr-14">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center pr-12 md:pr-14">
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface hover:border-primary/40 hover:bg-surface-container-high transition-colors"
-              >
-                <Link2 size={14} className="text-primary shrink-0" aria-hidden />
-                Copiar link
-              </button>
-              <button
-                type="button"
-                onClick={handleCopyMarkdown}
-                className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface hover:border-primary/40 hover:bg-surface-container-high transition-colors"
-              >
-                <Copy size={14} className="text-primary shrink-0" aria-hidden />
-                Copiar ficha (Markdown)
-              </button>
+              <div className="relative inline-flex">
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  disabled={copyFeedback?.target === 'link'}
+                  className={`inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface hover:border-primary/40 hover:bg-surface-container-high transition-colors disabled:pointer-events-none ${copyFeedback?.target === 'link' ? 'invisible' : ''}`}
+                >
+                  <Link2 size={14} className="text-primary shrink-0" aria-hidden />
+                  Copiar link
+                </button>
+                <AnimatePresence mode="wait">
+                  {copyFeedback?.target === 'link' ? (
+                    <motion.div
+                      key={`link-${copyFeedback.variant}-${copyFeedback.text}`}
+                      initial={{ opacity: 0, scale: 0.94 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 480, damping: 28 }}
+                      role="status"
+                      aria-live="polite"
+                      className={copyFeedback.variant === 'success' ? copySuccessOverlayClass : copyErrorOverlayClass}
+                    >
+                      {copyFeedback.variant === 'success' ? (
+                        <CheckCircle2 className={copySuccessIconClass} strokeWidth={2.25} aria-hidden />
+                      ) : (
+                        <AlertCircle className={copyErrorIconClass} strokeWidth={2.25} aria-hidden />
+                      )}
+                      <span>{copyFeedback.text}</span>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+              <div className="relative inline-flex">
+                <button
+                  type="button"
+                  onClick={handleCopyMarkdown}
+                  disabled={copyFeedback?.target === 'markdown'}
+                  className={`inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface hover:border-primary/40 hover:bg-surface-container-high transition-colors disabled:pointer-events-none ${copyFeedback?.target === 'markdown' ? 'invisible' : ''}`}
+                >
+                  <Copy size={14} className="text-primary shrink-0" aria-hidden />
+                  Copiar ficha (Markdown)
+                </button>
+                <AnimatePresence mode="wait">
+                  {copyFeedback?.target === 'markdown' ? (
+                    <motion.div
+                      key={`md-${copyFeedback.variant}-${copyFeedback.text}`}
+                      initial={{ opacity: 0, scale: 0.94 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 480, damping: 28 }}
+                      role="status"
+                      aria-live="polite"
+                      className={copyFeedback.variant === 'success' ? copySuccessOverlayClass : copyErrorOverlayClass}
+                    >
+                      {copyFeedback.variant === 'success' ? (
+                        <CheckCircle2 className={copySuccessIconClass} strokeWidth={2.25} aria-hidden />
+                      ) : (
+                        <AlertCircle className={copyErrorIconClass} strokeWidth={2.25} aria-hidden />
+                      )}
+                      <span>{copyFeedback.text}</span>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
             </div>
-            {copyHint ? (
-              <p className="text-xs font-medium text-secondary sm:text-right" role="status" aria-live="polite">
-                {copyHint}
-              </p>
-            ) : null}
           </div>
           <div className="space-y-8">
             <section>

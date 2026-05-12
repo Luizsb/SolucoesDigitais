@@ -90,20 +90,18 @@
   backdrop-filter: blur(12px);
 }
 
-/* Borda do campo de busca no header: reset global (* { border: 0 }) some com utilities em alguns builds */
+/* Campo de busca — claro: contorno escuro; escuro: tom branco suave */
 .nav-search-input {
   border-style: solid;
   border-width: 1px;
-  /* Borda visível no wrapper (.relative no TopNavBar); evita contorno duplo */
-  border-color: transparent;
+  border-color: rgba(0, 0, 0, 1);
 }
 
 .dark .nav-search-input {
-  border-color: color-mix(in srgb, var(--color-outline-variant) 25%, transparent);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .nav-search-input:focus-visible {
-  /* Claro: foco só pelo ring-inset no TSX (wrapper com borda preta) */
   border-color: transparent;
 }
 
@@ -113,6 +111,38 @@
 
 .glow-card:hover {
   box-shadow: 0 0 20px rgba(59, 191, 250, 0.1);
+}
+
+/* Halo atrás do pato (CTA): um só gradiente radial + blur leve; pulso só em opacidade */
+@keyframes mascot-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.mascot-cta-glow {
+  animation: mascot-glow 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-cta-glow {
+    animation: none;
+    opacity: 0.58;
+  }
+}
+
+.mascot-duck-aura {
+  background: radial-gradient(
+    ellipse 80% 78% at 50% 48%,
+    color-mix(in srgb, var(--color-primary) 36%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 14%, transparent) 48%,
+    transparent 70%
+  );
+  filter: blur(9px);
 }
 
 /* Custom scrollbar for a cleaner look */
