@@ -2,10 +2,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8f9fa;
+  --background: #f1f3f5;
   --surface: #ffffff;
-  --surface-container-low: #f1f3f5;
-  --surface-container: #e9ecef;
+  --surface-container-low: #ffffff;
+  --surface-container: #e2e8f0;
   --surface-container-high: #dee2e6;
   --surface-container-highest: #ced4da;
 
@@ -88,6 +88,27 @@
 .glass-nav {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
+}
+
+/* Borda do campo de busca no header: reset global (* { border: 0 }) some com utilities em alguns builds */
+.nav-search-input {
+  border-style: solid;
+  border-width: 1px;
+  /* Borda visível no wrapper (.relative no TopNavBar); evita contorno duplo */
+  border-color: transparent;
+}
+
+.dark .nav-search-input {
+  border-color: color-mix(in srgb, var(--color-outline-variant) 25%, transparent);
+}
+
+.nav-search-input:focus-visible {
+  /* Claro: foco só pelo ring-inset no TSX (wrapper com borda preta) */
+  border-color: transparent;
+}
+
+.dark .nav-search-input:focus-visible {
+  border-color: var(--color-primary);
 }
 
 .glow-card:hover {

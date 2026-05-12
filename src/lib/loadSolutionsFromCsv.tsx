@@ -1,11 +1,20 @@
 import {
   BarChart3,
   BrainCircuit,
+  Cpu,
+  Database,
+  FileText,
   FolderKanban,
+  LayoutDashboard,
+  Layers,
   Network,
+  Package,
   Scale,
   ShieldCheck,
+  Smartphone,
+  Wrench,
   Workflow,
+  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import coverAcervo from '../assets/covers/acervo.svg';
@@ -33,7 +42,7 @@ type CategoryPresentation = {
 
 const CATEGORY_PRESENTATION: Array<{ keywords: string[]; visual: CategoryPresentation }> = [
   {
-    keywords: ['ia', 'estrateg', 'atendimento', 'genius'],
+    keywords: ['ia', 'inteligencia', 'genius', 'bot', 'gpt', 'llm'],
     visual: {
       icon: BrainCircuit,
       iconBg: 'bg-primary/10',
@@ -42,25 +51,34 @@ const CATEGORY_PRESENTATION: Array<{ keywords: string[]; visual: CategoryPresent
     },
   },
   {
-    keywords: ['acervo', 'ativo', 'document'],
+    keywords: ['acervo', 'ativo', 'repositorio', 'biblioteca'],
     visual: {
-      icon: FolderKanban,
+      icon: Database,
       iconBg: 'bg-tertiary/10',
       iconColor: 'text-tertiary',
       imageUrl: coverAcervo,
     },
   },
   {
-    keywords: ['analytics', 'kpi', 'dash'],
+    keywords: ['plataforma', 'hub', 'portal'],
     visual: {
-      icon: BarChart3,
+      icon: Layers,
+      iconBg: 'bg-tertiary/10',
+      iconColor: 'text-tertiary',
+      imageUrl: coverAcervo,
+    },
+  },
+  {
+    keywords: ['dashboard', 'analytics', 'kpi', 'dash', 'indicador', 'metrica'],
+    visual: {
+      icon: LayoutDashboard,
       iconBg: 'bg-secondary/10',
       iconColor: 'text-secondary',
       imageUrl: coverDash,
     },
   },
   {
-    keywords: ['automa', 'workflow', 'pdf'],
+    keywords: ['automa', 'workflow', 'fluxo', 'processo'],
     visual: {
       icon: Workflow,
       iconBg: 'bg-on-surface/5',
@@ -69,7 +87,25 @@ const CATEGORY_PRESENTATION: Array<{ keywords: string[]; visual: CategoryPresent
     },
   },
   {
-    keywords: ['jurid', 'contrat'],
+    keywords: ['produto digital', 'aplicativo', 'app', 'mobile', 'web'],
+    visual: {
+      icon: Package,
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
+      imageUrl: coverBrieflab,
+    },
+  },
+  {
+    keywords: ['ferramenta', 'utilitario', 'conversor', 'extensao', 'script'],
+    visual: {
+      icon: Wrench,
+      iconBg: 'bg-on-surface/5',
+      iconColor: 'text-on-surface',
+      imageUrl: coverPdf,
+    },
+  },
+  {
+    keywords: ['jurid', 'contrat', 'legal', 'norma'],
     visual: {
       icon: Scale,
       iconBg: 'bg-tertiary/10',
@@ -78,7 +114,7 @@ const CATEGORY_PRESENTATION: Array<{ keywords: string[]; visual: CategoryPresent
     },
   },
   {
-    keywords: ['compliance', 'risco', 'seguran'],
+    keywords: ['compliance', 'risco', 'seguran', 'auditoria', 'lgpd'],
     visual: {
       icon: ShieldCheck,
       iconBg: 'bg-secondary/10',
@@ -202,11 +238,8 @@ function mapRowToSolution(row: CsvRow, index: number): Solution {
   const problemTypes = splitMultiValue(row.tipo_problema ?? '');
   const impact = row.impacto_principal?.trim() || 'Impacto não informado';
   const resultadoEsperado = row.resultado_esperado?.trim() || impact;
-  const oQueE =
-    row.o_que_e?.trim() ||
-    row.observacoes?.trim() ||
-    row.problema_resolvido?.trim() ||
-    'Descrição não informada.';
+  /* "O que é" vem só da coluna o_que_e (obrigatório na planilha); observações e problema ficam nos próprios campos */
+  const oQueE = row.o_que_e?.trim() || 'Descrição não informada.';
   const quandoUsar = splitMultiValue(row.quando_usar ?? '');
   const comoUsar = row.como_usar?.trim() || undefined;
   const impactTypes = splitMultiValue(row.tipo_impacto ?? '');

@@ -27,7 +27,7 @@ export const SolutionListRow: FC<SolutionListRowProps> = ({
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex items-center gap-6 bg-surface-container-low p-4 rounded-xl hover:bg-surface-container-high transition-all group border border-transparent hover:border-outline-variant/10"
+      className="flex items-center gap-6 bg-surface-container-low p-4 rounded-xl hover:bg-surface-container-high transition-all group border border-outline-variant/15 shadow-sm hover:shadow-md hover:border-outline-variant/30"
     >
       <div
         className={`w-10 h-10 rounded-lg ${solution.iconBg} flex items-center justify-center ${solution.iconColor} shrink-0`}
@@ -38,7 +38,9 @@ export const SolutionListRow: FC<SolutionListRowProps> = ({
       <div className="flex-grow min-w-0">
         <div className="min-w-0">
           <h3 className="font-bold text-on-surface truncate">{solution.title}</h3>
-          <p className="text-xs text-on-surface-variant truncate">{solution.category}</p>
+          <p className="text-xs text-on-surface-variant truncate">
+            {solution.category}
+          </p>
         </div>
       </div>
 

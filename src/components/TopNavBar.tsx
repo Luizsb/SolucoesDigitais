@@ -95,7 +95,7 @@ export function TopNavBar({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-6 shrink-0">
-          <div className="relative group hidden xl:block">
+          <div className="relative group hidden xl:block rounded-xl border border-black dark:border-0">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
               size={16}
@@ -106,7 +106,7 @@ export function TopNavBar({
               placeholder="Buscar soluções..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-surface-container-low border border-outline-variant/20 rounded-lg pl-10 pr-10 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+              className="nav-search-input w-64 rounded-xl bg-white py-2 pl-10 pr-10 text-sm shadow-sm shadow-black/[0.06] transition-all placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary/50 dark:bg-surface-container-low dark:shadow-none dark:focus:ring-0"
             />
             {searchQuery && (
               <button

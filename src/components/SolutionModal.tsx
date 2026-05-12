@@ -1,28 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
+  Copy,
+  Edit3,
   ExternalLink,
   Info,
+  Link2,
   Rocket,
   Share2,
-  User,
   X,
 } from 'lucide-react';
 import type { Solution } from '../types/solution';
 import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
+import { solutionToMarkdown } from '../lib/solutionExportMarkdown';
 import { ResponsibleNames } from './ResponsibleNames';
 
 type SolutionModalProps = {
   solution: Solution;
+  /** URL com `?solucao=` para partilhar esta ficha. */
+  shareUrl: string;
   onClose: () => void;
+  onSuggestUpdate: (s: Solution) => void;
   responsibleLinks: ResponsibleLinksMap;
 };
 
-export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionModalProps) {
-  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
+export function SolutionModal({
+  solution,
+  shareUrl,
+  onClose,
+  onSuggestUpdate,
+  responsibleLinks,
+}: SolutionModalProps) {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [copyHint, setCopyHint] = useState<string | null>(null);
+  const copyHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const responsibleList = solution.responsible
     .split(';')
     .map((item) => item.trim())
@@ -47,6 +61,43 @@ export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionM
       document.body.style.overflow = previousOverflow;
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (copyHintTimerRef.current) {
+        clearTimeout(copyHintTimerRef.current);
+      }
+    };
+  }, []);
+
+  const showCopyHint = (message: string) => {
+    if (copyHintTimerRef.current) {
+      clearTimeout(copyHintTimerRef.current);
+    }
+    setCopyHint(message);
+    copyHintTimerRef.current = setTimeout(() => {
+      setCopyHint(null);
+      copyHintTimerRef.current = null;
+    }, 2800);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showCopyHint('Link copiado.');
+    } catch {
+      showCopyHint('Não foi possível copiar o link.');
+    }
+  };
+
+  const handleCopyMarkdown = async () => {
+    try {
+      await navigator.clipboard.writeText(solutionToMarkdown(solution));
+      showCopyHint('Ficha em Markdown copiada.');
+    } catch {
+      showCopyHint('Não foi possível copiar a ficha.');
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start md:items-center justify-center p-3 md:p-6 overflow-y-auto">
@@ -115,10 +166,44 @@ export function SolutionModal({ solution, onClose, responsibleLinks }: SolutionM
                 </div>
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => onSuggestUpdate(solution)}
+              className="w-full max-w-[280px] md:max-w-none flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-all backdrop-blur-sm shadow-sm"
+            >
+              <Edit3 size={14} />
+              Sugerir atualização
+            </button>
           </div>
         </div>
 
         <div className="min-w-0 min-h-0 p-5 md:p-8 lg:p-10 pb-10 md:pb-14 overflow-visible md:overflow-y-auto custom-scrollbar">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between pr-12 md:pr-14">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface hover:border-primary/40 hover:bg-surface-container-high transition-colors"
+              >
+                <Link2 size={14} className="text-primary shrink-0" aria-hidden />
+                Copiar link
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyMarkdown}
+                className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-3 py-2 text-xs font-semibold text-on-surface hover:border-primary/40 hover:bg-surface-container-high transition-colors"
+              >
+                <Copy size={14} className="text-primary shrink-0" aria-hidden />
+                Copiar ficha (Markdown)
+              </button>
+            </div>
+            {copyHint ? (
+              <p className="text-xs font-medium text-secondary sm:text-right" role="status" aria-live="polite">
+                {copyHint}
+              </p>
+            ) : null}
+          </div>
           <div className="space-y-8">
             <section>
               <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-2">

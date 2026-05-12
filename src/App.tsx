@@ -18,12 +18,20 @@ import {
 import mascoteOficial from './assets/MascoteID.png';
 import { loadResponsibleLinksFromSheet, loadSolutionsFromCsv } from './lib/loadSolutionsFromCsv';
 import type { ResponsibleLinksMap } from './lib/loadSolutionsFromCsv';
+import {
+  buildSolutionShareUrl,
+  findSolutionByShareParam,
+  getSolutionShareParamFromLocation,
+  getSolutionShareSlug,
+  setSolutionShareParamInLocation,
+} from './lib/solutionDeepLink';
 import type { Solution, Tab, Theme, ViewMode } from './types/solution';
 import { KPICard } from './components/KPICard';
 import { SolutionCard } from './components/SolutionCard';
 import { SolutionListRow } from './components/SolutionListRow';
 import { SolutionModal } from './components/SolutionModal';
 import { SolutionSubmissionForm } from './components/SolutionSubmissionForm';
+import { SolutionUpdateForm } from './components/SolutionUpdateForm';
 import { SolutionsCatalog } from './components/SolutionsCatalog';
 import { TopNavBar } from './components/TopNavBar';
 import { LoginPage } from './components/LoginPage';
@@ -74,6 +82,7 @@ export default function App() {
   const [categoryFilter, setCategoryFilter] = useState<string>('Todas');
   const [responsibleFilter, setResponsibleFilter] = useState<string>('Todos');
   const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null);
+  const [solutionToUpdate, setSolutionToUpdate] = useState<Solution | null>(null);
   const [unreadNotificationIds, setUnreadNotificationIds] = useState<string[]>([]);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -156,6 +165,62 @@ export default function App() {
     localStorage.setItem(KNOWN_SOLUTIONS_STORAGE_KEY, JSON.stringify(currentIds));
     localStorage.setItem(UNREAD_SOLUTIONS_STORAGE_KEY, JSON.stringify(nextUnreadIds));
   }, [solutions]);
+
+  /** Abre a ficha quando o URL traz `?solucao=<id>` (deep link). */
+  useEffect(() => {
+    if (!isAuthenticated || isLoadingSolutions) return;
+    if (solutions.length === 0) {
+      if (getSolutionShareParamFromLocation()) {
+        setSolutionShareParamInLocation(null);
+      }
+      return;
+    }
+    const param = getSolutionShareParamFromLocation();
+    if (!param) return;
+    const found = findSolutionByShareParam(param, solutions);
+    if (found) {
+      setSelectedSolution(found);
+    } else {
+      setSolutionShareParamInLocation(null);
+    }
+  }, [isAuthenticated, isLoadingSolutions, solutions]);
+
+  /** Mantém `?solucao=` alinhado ao modal aberto (sem recarregar a página). */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const current = getSolutionShareParamFromLocation();
+    if (selectedSolution) {
+      const slug = getSolutionShareSlug(selectedSolution, solutions);
+      if (current !== slug) {
+        setSolutionShareParamInLocation(slug);
+      }
+    } else if (current) {
+      setSolutionShareParamInLocation(null);
+    }
+  }, [isAuthenticated, selectedSolution, solutions]);
+
+  /** Voltar / avançar no histórico do browser atualiza ou fecha o modal. */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const syncFromUrl = () => {
+      const param = getSolutionShareParamFromLocation();
+      if (!param) {
+        setSelectedSolution(null);
+        return;
+      }
+      const found = findSolutionByShareParam(param, solutions) ?? null;
+      if (found) {
+        setSelectedSolution(found);
+      } else {
+        setSolutionShareParamInLocation(null);
+        setSelectedSolution(null);
+      }
+    };
+
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, [isAuthenticated, solutions]);
 
   useEffect(() => {
     const toggleBackToTopVisibility = () => {
@@ -274,7 +339,10 @@ export default function App() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserEmail('');
+    setSelectedSolution(null);
+    setSolutionToUpdate(null);
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    setSolutionShareParamInLocation(null);
   };
 
   const renderPagination = () => {
@@ -829,14 +897,49 @@ export default function App() {
         {selectedSolution && (
           <SolutionModal
             solution={selectedSolution}
+            shareUrl={buildSolutionShareUrl(selectedSolution, solutions)}
             onClose={() => setSelectedSolution(null)}
+            onSuggestUpdate={(s) => {
+              setSelectedSolution(null);
+              setSolutionToUpdate(s);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             responsibleLinks={responsibleLinks}
           />
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {showBackToTop && !selectedSolution && isAuthenticated && (
+        {solutionToUpdate && (
+          <div className="fixed inset-0 z-[110] flex items-start md:items-center justify-center p-3 md:p-6 overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSolutionToUpdate(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-5xl bg-surface-container rounded-3xl shadow-2xl border border-outline-variant/10 overflow-hidden mx-auto my-3 md:my-0 flex flex-col max-h-[90vh]"
+            >
+              <div className="overflow-y-auto custom-scrollbar flex-grow">
+                <div className="p-5 md:p-10">
+                  <SolutionUpdateForm
+                    solution={solutionToUpdate}
+                    onCancel={() => setSolutionToUpdate(null)}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showBackToTop && !selectedSolution && !solutionToUpdate && isAuthenticated && (
           <motion.button
             type="button"
             onClick={handleBackToTop}

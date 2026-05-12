@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { CheckCircle2, CircleHelp, Sparkles } from 'lucide-react';
+import { CheckCircle2, CircleHelp, Info, Layers, Link, MessageSquare, Sparkles, X } from 'lucide-react';
 
 type SolutionSubmissionFormProps = {
   onCancel: () => void;
@@ -171,6 +171,7 @@ export function SolutionSubmissionForm({ onCancel }: SolutionSubmissionFormProps
 
     setErrors([]);
     setSubmitted(true);
+    console.log('Payload de nova solução:', { ...form, tipo_solicitacao: 'nova_solucao' });
   };
 
   const toggleMultiOption = (key: 'tipoProblema' | 'tipoImpacto', option: string) => {
@@ -227,32 +228,60 @@ export function SolutionSubmissionForm({ onCancel }: SolutionSubmissionFormProps
     setSubmitted(false);
   };
 
-  return (
-    <section className="mx-auto w-full max-w-5xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <header className="space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
-          <Sparkles size={14} />
-          Novo fluxo interno
+  if (submitted) {
+    return (
+      <div className="mx-auto w-full max-w-3xl py-12 text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10 text-secondary">
+          <CheckCircle2 size={40} />
         </div>
-        <div
-          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
-            aiProviderStatus === 'ollama'
-              ? 'bg-secondary/15 text-secondary border border-secondary/35'
-              : aiProviderStatus === 'checking'
-                ? 'bg-outline-variant/20 text-on-surface-variant border border-outline-variant/30'
-                : 'bg-tertiary/15 text-tertiary border border-tertiary/35'
-          }`}
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-on-surface">Cadastro validado!</h2>
+          <p className="text-on-surface-variant max-w-md mx-auto">
+            Perfeito para teste. No próximo passo, este payload será enviado para a aba de revisão da planilha.
+          </p>
+        </div>
+        <div className="pt-4 text-xs text-on-surface-variant font-mono bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 text-left overflow-auto max-h-40">
+          <p className="mb-2 font-bold uppercase tracking-widest text-[10px]">Payload Log:</p>
+          <pre>{JSON.stringify({ ...form, tipo_solicitacao: 'nova_solucao' }, null, 2)}</pre>
+        </div>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-8 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-all"
         >
-          {aiProviderStatus === 'ollama'
-            ? 'Ollama ativo'
-            : aiProviderStatus === 'checking'
-              ? 'Verificando IA...'
-              : 'Ollama indisponível'}
+          Voltar ao Portfólio
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section className="mx-auto w-full max-w-5xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+      <header className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
+            <Sparkles size={14} />
+            Novo cadastro
+          </div>
+          <div
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
+              aiProviderStatus === 'ollama'
+                ? 'bg-secondary/15 text-secondary border border-secondary/35'
+                : aiProviderStatus === 'checking'
+                  ? 'bg-outline-variant/20 text-on-surface-variant border border-outline-variant/30'
+                  : 'bg-tertiary/15 text-tertiary border border-tertiary/35'
+            }`}
+          >
+            {aiProviderStatus === 'ollama'
+              ? 'Ollama ativo'
+              : aiProviderStatus === 'checking'
+                ? 'Verificando IA...'
+                : 'Ollama indisponível'}
+          </div>
         </div>
         <h1 className="text-3xl font-bold text-on-surface">Cadastro de nova solução</h1>
         <p className="text-on-surface-variant">
-          Esta tela é um protótipo funcional para testes de experiência. O envio para planilha será conectado no
-          próximo passo.
+          Preencha os campos abaixo para sugerir uma nova solução para o portfólio.
         </p>
       </header>
 
@@ -267,268 +296,298 @@ export function SolutionSubmissionForm({ onCancel }: SolutionSubmissionFormProps
         </div>
       )}
 
-      {submitted && (
-        <div className="rounded-xl border border-secondary/35 bg-secondary/10 p-4 text-sm text-on-surface">
-          <p className="flex items-center gap-2 font-semibold text-secondary mb-2">
-            <CheckCircle2 size={16} />
-            Cadastro validado com sucesso
-          </p>
-          <p>Perfeito para teste. No próximo passo, este payload será enviado para a aba de revisão da planilha.</p>
-        </div>
-      )}
-
       {aiFeedback && (
         <div className="rounded-xl border border-primary/30 bg-primary/10 p-3 text-sm text-on-surface">
           {aiFeedback}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            label="Nome da solução *"
-            hint="Nome como a solução será identificada no portfólio para busca e leitura."
-          >
-            <input
-              value={form.nomeSolucao}
-              onChange={(e) => updateField('nomeSolucao', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-              placeholder="Ex.: Assistente de triagem documental"
-            />
-          </FormField>
-          <FormField
-            label="Categoria *"
-            hint="Classificação principal da solução para facilitar filtros e descoberta."
-          >
-            <select
-              value={form.categoria}
-              onChange={(e) => updateField('categoria', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+      <form onSubmit={handleSubmit} className="space-y-10">
+        {/* Bloco 1: Informações Gerais */}
+        <div className="space-y-6">
+          <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 border-b border-outline-variant/20 pb-2">
+            <Info size={18} className="text-primary" />
+            Informações gerais
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField
+              label="Nome da solução *"
+              hint="Nome como a solução será identificada no portfólio para busca e leitura."
             >
-              {CATEGORIA_OPTIONS.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-              <option value="Outros">Outros</option>
-            </select>
-          </FormField>
-          {form.categoria === 'Outros' && (
-            <FormField label="Categoria (outros) *">
               <input
-                value={form.categoriaOutro}
-                onChange={(e) => updateField('categoriaOutro', e.target.value)}
+                value={form.nomeSolucao}
+                onChange={(e) => updateField('nomeSolucao', e.target.value)}
                 className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="Informe a categoria"
+                placeholder="Ex.: Assistente de triagem documental"
               />
             </FormField>
-          )}
-          <FormField
-            label="Área responsável *"
-            hint="Time ou área dona da solução dentro da organização."
-          >
-            <select
-              value={form.areaResponsavel}
-              onChange={(e) => updateField('areaResponsavel', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+            <FormField
+              label="Categoria *"
+              hint="Classificação principal da solução para facilitar filtros e descoberta."
             >
-              {AREA_RESPONSAVEL_OPTIONS.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-              <option value="Outros">Outros</option>
-            </select>
-          </FormField>
-          {form.areaResponsavel === 'Outros' && (
-            <FormField label="Área responsável (outros) *">
-              <input
-                value={form.areaResponsavelOutro}
-                onChange={(e) => updateField('areaResponsavelOutro', e.target.value)}
+              <select
+                value={form.categoria}
+                onChange={(e) => updateField('categoria', e.target.value)}
                 className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-                placeholder="Informe a área responsável"
+              >
+                {CATEGORIA_OPTIONS.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+                <option value="Outros">Outros</option>
+              </select>
+            </FormField>
+            {form.categoria === 'Outros' && (
+              <FormField label="Categoria (outros) *">
+                <input
+                  value={form.categoriaOutro}
+                  onChange={(e) => updateField('categoriaOutro', e.target.value)}
+                  className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Informe a categoria"
+                />
+              </FormField>
+            )}
+            <FormField
+              label="Área responsável *"
+              hint="Time ou área dona da solução dentro da organização."
+            >
+              <select
+                value={form.areaResponsavel}
+                onChange={(e) => updateField('areaResponsavel', e.target.value)}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                {AREA_RESPONSAVEL_OPTIONS.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+                <option value="Outros">Outros</option>
+              </select>
+            </FormField>
+            {form.areaResponsavel === 'Outros' && (
+              <FormField label="Área responsável (outros) *">
+                <input
+                  value={form.areaResponsavelOutro}
+                  onChange={(e) => updateField('areaResponsavelOutro', e.target.value)}
+                  className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Informe a área responsável"
+                />
+              </FormField>
+            )}
+            <FormField
+              label="Responsável(is) *"
+              hint="Pessoa(s) de referência para dúvidas, evolução e manutenção da solução."
+            >
+              <input
+                value={form.responsible}
+                onChange={(e) => updateField('responsible', e.target.value)}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Ex.: Nome 1; Nome 2"
               />
             </FormField>
-          )}
-          <FormField
-            label="Responsável(is) *"
-            hint="Pessoa(s) de referência para dúvidas, evolução e manutenção da solução."
-          >
-            <input
-              value={form.responsible}
-              onChange={(e) => updateField('responsible', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-              placeholder="Ex.: Nome 1; Nome 2"
-            />
-          </FormField>
-          <FormField label="Status *" hint="Situação atual da solução no ciclo de uso e evolução.">
-            <select
-              value={form.status}
-              onChange={(e) => updateField('status', e.target.value as FormData['status'])}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+            <FormField label="Status *" hint="Situação atual da solução no ciclo de uso e evolução.">
+              <select
+                value={form.status}
+                onChange={(e) => updateField('status', e.target.value as FormData['status'])}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="Em desenvolvimento">Em desenvolvimento</option>
+                <option value="Em uso">Em uso</option>
+                <option value="Piloto">Piloto</option>
+              </select>
+            </FormField>
+            <FormField
+              className="md:col-span-2"
+              label="Nível de maturidade *"
+              hint="O quão pronta e confiável a solução está para uso real por outras pessoas."
             >
-              <option value="Em desenvolvimento">Em desenvolvimento</option>
-              <option value="Em uso">Em uso</option>
-              <option value="Piloto">Piloto</option>
-            </select>
-          </FormField>
-          <FormField
-            className="md:col-span-2"
-            label="Nível de maturidade *"
-            hint="O quão pronta e confiável a solução está para uso real por outras pessoas."
-          >
-            <select
-              value={form.nivelMaturidade}
-              onChange={(e) => updateField('nivelMaturidade', e.target.value as FormData['nivelMaturidade'])}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+              <select
+                value={form.nivelMaturidade}
+                onChange={(e) => updateField('nivelMaturidade', e.target.value as FormData['nivelMaturidade'])}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="Baixo">🟡 Baixo — ideia/protótipo, uso individual, instável</option>
+                <option value="Médio">🟠 Médio — funcional, uso real pontual, depende do criador</option>
+                <option value="Alto">🟢 Alto — estável, documentado, uso escalável</option>
+              </select>
+            </FormField>
+          </div>
+        </div>
+
+        {/* Bloco 2: Entenda Rápido */}
+        <div className="space-y-6">
+          <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 border-b border-outline-variant/20 pb-2">
+            <CheckCircle2 size={18} className="text-primary" />
+            Entenda rápido
+          </h3>
+          <div className="space-y-4">
+            <FormField label="O que é *" hint="Descrição curta e objetiva da solução e do seu propósito.">
+              <textarea
+                value={form.oQueE}
+                onChange={(e) => updateField('oQueE', e.target.value)}
+                rows={3}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Resumo objetivo da solução."
+              />
+            </FormField>
+            <FormField
+              label="Quando usar * (separe itens por ; )"
+              hint="Descreva cenários de uso prático. Use ';' para separar múltiplos contextos."
             >
-              <option value="Baixo">🟡 Baixo — ideia/protótipo, uso individual, instável</option>
-              <option value="Médio">🟠 Médio — funcional, uso real pontual, depende do criador</option>
-              <option value="Alto">🟢 Alto — estável, documentado, uso escalável</option>
-            </select>
-          </FormField>
+              <textarea
+                value={form.quandoUsar}
+                onChange={(e) => updateField('quandoUsar', e.target.value)}
+                rows={3}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Quando precisar de X; Quando quiser ganhar Y..."
+              />
+            </FormField>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField label="Problema resolvido *" hint="Dor real que a solução elimina ou reduz.">
+                <textarea
+                  value={form.problemaResolvido}
+                  onChange={(e) => updateField('problemaResolvido', e.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </FormField>
+              <FormField
+                label="Resultado esperado *"
+                hint="Resultados concretos esperados após adoção da solução."
+              >
+                <textarea
+                  value={form.resultadoEsperado}
+                  onChange={(e) => updateField('resultadoEsperado', e.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </FormField>
+            </div>
+            <FormField label="Impacto principal *" hint="Principal benefício estratégico ou operacional gerado.">
+              <textarea
+                value={form.impactoPrincipal}
+                onChange={(e) => updateField('impactoPrincipal', e.target.value)}
+                rows={2}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Resumo do principal ganho da solução."
+              />
+            </FormField>
+            <FormField label="Como acessar / usar">
+              <textarea
+                value={form.comoUsar}
+                onChange={(e) => updateField('comoUsar', e.target.value)}
+                rows={2}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </FormField>
+          </div>
         </div>
 
-        <FormField label="O que é *" hint="Descrição curta e objetiva da solução e do seu propósito.">
-          <textarea
-            value={form.oQueE}
-            onChange={(e) => updateField('oQueE', e.target.value)}
-            rows={3}
-            className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-            placeholder="Resumo objetivo da solução."
-          />
-        </FormField>
-
-        <FormField
-          label="Quando usar * (separe itens por ; )"
-          hint="Descreva cenários de uso prático. Use ';' para separar múltiplos contextos."
-        >
-          <textarea
-            value={form.quandoUsar}
-            onChange={(e) => updateField('quandoUsar', e.target.value)}
-            rows={3}
-            className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-            placeholder="Quando precisar de X; Quando quiser ganhar Y..."
-          />
-        </FormField>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField label="Problema resolvido *" hint="Dor real que a solução elimina ou reduz.">
-            <textarea
-              value={form.problemaResolvido}
-              onChange={(e) => updateField('problemaResolvido', e.target.value)}
-              rows={3}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+        {/* Bloco 3: Classificação */}
+        <div className="space-y-6">
+          <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 border-b border-outline-variant/20 pb-2">
+            <Layers size={18} className="text-primary" />
+            Classificação
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <MultiSelectField
+              label="Tipo de problema *"
+              hint="Selecione os tipos de dor atendidos pela solução."
+              options={[...TIPO_PROBLEMA_OPTIONS, 'Outros']}
+              selected={form.tipoProblema}
+              onToggle={(option) => toggleMultiOption('tipoProblema', option)}
             />
-          </FormField>
-          <FormField
-            label="Resultado esperado *"
-            hint="Resultados concretos esperados após adoção da solução."
-          >
-            <textarea
-              value={form.resultadoEsperado}
-              onChange={(e) => updateField('resultadoEsperado', e.target.value)}
-              rows={3}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+            <MultiSelectField
+              label="Tipo de impacto *"
+              hint="Selecione os tipos de ganho entregues pela solução."
+              options={[...TIPO_IMPACTO_OPTIONS, 'Outros']}
+              selected={form.tipoImpacto}
+              onToggle={(option) => toggleMultiOption('tipoImpacto', option)}
             />
-          </FormField>
-        </div>
-
-        <FormField label="Impacto principal *" hint="Principal benefício estratégico ou operacional gerado.">
-          <textarea
-            value={form.impactoPrincipal}
-            onChange={(e) => updateField('impactoPrincipal', e.target.value)}
-            rows={2}
-            className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-            placeholder="Resumo do principal ganho da solução."
-          />
-        </FormField>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MultiSelectField
-            label="Tipo de problema *"
-            hint="Selecione os tipos de dor atendidos pela solução."
-            options={[...TIPO_PROBLEMA_OPTIONS, 'Outros']}
-            selected={form.tipoProblema}
-            onToggle={(option) => toggleMultiOption('tipoProblema', option)}
-          />
-          <MultiSelectField
-            label="Tipo de impacto *"
-            hint="Selecione os tipos de ganho entregues pela solução."
-            options={[...TIPO_IMPACTO_OPTIONS, 'Outros']}
-            selected={form.tipoImpacto}
-            onToggle={(option) => toggleMultiOption('tipoImpacto', option)}
-          />
-        </div>
-        {form.tipoProblema.includes('Outros') && (
-          <FormField label="Tipo de problema (outros) *">
-            <input
-              value={form.tipoProblemaOutro}
-              onChange={(e) => updateField('tipoProblemaOutro', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-              placeholder="Descreva outro tipo de problema"
-            />
-          </FormField>
-        )}
-        {form.tipoImpacto.includes('Outros') && (
-          <FormField label="Tipo de impacto (outros) *">
-            <input
-              value={form.tipoImpactoOutro}
-              onChange={(e) => updateField('tipoImpactoOutro', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-              placeholder="Descreva outro tipo de impacto"
-            />
-          </FormField>
-        )}
-
-        <FormField label="Como acessar / usar">
-          <textarea
-            value={form.comoUsar}
-            onChange={(e) => updateField('comoUsar', e.target.value)}
-            rows={2}
-            className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </FormField>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            {form.tipoProblema.includes('Outros') && (
+              <FormField label="Tipo de problema (outros) *" labelClassName="mt-[2px]">
+                <input
+                  value={form.tipoProblemaOutro}
+                  onChange={(e) => updateField('tipoProblemaOutro', e.target.value)}
+                  className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Descreva outro tipo de problema"
+                />
+              </FormField>
+            )}
+            {form.tipoImpacto.includes('Outros') && (
+              <FormField label="Tipo de impacto (outros) *">
+                <input
+                  value={form.tipoImpactoOutro}
+                  onChange={(e) => updateField('tipoImpactoOutro', e.target.value)}
+                  className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  placeholder="Descreva outro tipo de impacto"
+                />
+              </FormField>
+            )}
+          </div>
           <FormField label="Tags (separadas por ;)">
             <input
               value={form.tags}
               onChange={(e) => updateField('tags', e.target.value)}
               className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </FormField>
-          <FormField label="Link de acesso">
-            <input
-              value={form.linkAcesso}
-              onChange={(e) => updateField('linkAcesso', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </FormField>
-          <FormField label="Link demo">
-            <input
-              value={form.linkDemo}
-              onChange={(e) => updateField('linkDemo', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </FormField>
-          <FormField label="Link documentação">
-            <input
-              value={form.linkDocumentacao}
-              onChange={(e) => updateField('linkDocumentacao', e.target.value)}
-              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+              placeholder="Ex.: IA; Automação; PDF"
             />
           </FormField>
         </div>
 
-        <FormField label="Observações">
-          <textarea
-            value={form.observacoes}
-            onChange={(e) => updateField('observacoes', e.target.value)}
-            rows={3}
-            className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </FormField>
+        {/* Bloco 4: Links */}
+        <div className="space-y-6">
+          <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 border-b border-outline-variant/20 pb-2">
+            <Link size={18} className="text-primary" />
+            Links
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField label="Link de acesso">
+              <input
+                value={form.linkAcesso}
+                onChange={(e) => updateField('linkAcesso', e.target.value)}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="https://..."
+              />
+            </FormField>
+            <FormField label="Link demo">
+              <input
+                value={form.linkDemo}
+                onChange={(e) => updateField('linkDemo', e.target.value)}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="https://..."
+              />
+            </FormField>
+            <FormField label="Link documentação">
+              <input
+                value={form.linkDocumentacao}
+                onChange={(e) => updateField('linkDocumentacao', e.target.value)}
+                className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="https://..."
+              />
+            </FormField>
+          </div>
+        </div>
+
+        {/* Bloco 5: Observações */}
+        <div className="space-y-6">
+          <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 border-b border-outline-variant/20 pb-2">
+            <MessageSquare size={18} className="text-primary" />
+            Observações
+          </h3>
+          <FormField label="Observações adicionais">
+            <textarea
+              value={form.observacoes}
+              onChange={(e) => updateField('observacoes', e.target.value)}
+              rows={3}
+              className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
+              placeholder="Alguma informação extra que não se encaixa nos campos acima."
+            />
+          </FormField>
+        </div>
 
         <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low/40 p-4 text-xs text-on-surface-variant">
           <p className="font-semibold text-on-surface mb-1">Mapeamento para planilha (prévia)</p>
@@ -539,12 +598,12 @@ export function SolutionSubmissionForm({ onCancel }: SolutionSubmissionFormProps
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3 pt-2">
+        <div className="flex flex-wrap gap-3 pt-4">
           <button
             type="button"
             onClick={() => void handleAiReview()}
             disabled={isGeneratingAi}
-            className={`px-5 py-2.5 rounded-xl font-semibold transition-all border ${
+            className={`px-6 py-3 rounded-xl font-semibold transition-all border ${
               isGeneratingAi
                 ? 'border-outline-variant/20 text-on-surface-variant/70 cursor-wait'
                 : 'border-primary/30 text-primary hover:bg-primary/10'
@@ -554,21 +613,21 @@ export function SolutionSubmissionForm({ onCancel }: SolutionSubmissionFormProps
           </button>
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold hover:opacity-90 transition-opacity"
+            className="px-8 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
           >
             Validar cadastro
           </button>
           <button
             type="button"
             onClick={handleReset}
-            className="px-5 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface font-semibold hover:border-primary/50 hover:text-primary transition-colors"
+            className="px-6 py-3 rounded-xl border border-outline-variant/30 text-on-surface font-semibold hover:border-primary/50 hover:text-primary transition-colors"
           >
             Limpar
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="px-5 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface-variant font-semibold hover:text-on-surface transition-colors"
+            className="px-6 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-semibold hover:text-on-surface transition-colors"
           >
             Voltar
           </button>
@@ -583,12 +642,15 @@ type FormFieldProps = {
   hint?: string;
   children: ReactNode;
   className?: string;
+  labelClassName?: string;
 };
 
-function FormField({ label, hint, children, className }: FormFieldProps) {
+function FormField({ label, hint, children, className, labelClassName }: FormFieldProps) {
   return (
     <label className={`space-y-2 block ${className ?? ''}`}>
-      <span className="inline-flex items-center gap-1.5 text-xs font-label uppercase tracking-wider text-on-surface-variant">
+      <span
+        className={`inline-flex items-center gap-1.5 text-xs font-label uppercase tracking-wider text-on-surface-variant ${labelClassName ?? ''}`}
+      >
         {label}
         {hint && <InfoHint text={hint} />}
       </span>

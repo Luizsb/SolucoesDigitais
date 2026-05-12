@@ -27,7 +27,7 @@ export const SolutionCard: FC<SolutionCardProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.01 }}
-      className="group bg-surface-container-low p-6 rounded-2xl transition-all duration-300 hover:bg-surface-container-high glow-card flex flex-col"
+      className="group bg-surface-container-low p-6 rounded-2xl transition-all duration-300 hover:bg-surface-container-high glow-card flex flex-col border border-outline-variant/15 shadow-sm hover:shadow-md"
     >
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-4">
@@ -68,7 +68,7 @@ export const SolutionCard: FC<SolutionCardProps> = ({
           <p className="text-xs font-label uppercase text-on-surface-variant tracking-wider mb-2">
             O que é
           </p>
-          <p className="text-sm text-on-surface leading-snug">{solution.oQueE || solution.impact}</p>
+          <p className="text-sm text-on-surface leading-snug">{solution.oQueE}</p>
         </div>
       </div>
 
