@@ -1,10 +1,28 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { CheckCircle2, CircleHelp, Edit3, Info, X } from 'lucide-react';
 import {
   SOLUTION_STATUS_OPTION_TITLE,
   SOLUTION_STATUS_ORDER,
 } from '../lib/solutionStatusFormCopy';
 import { StatusFieldLegend } from './StatusFieldLegend';
+import {
+  isRevisaoAppsScriptSubmitActive,
+  isRevisaoFormFallbackConfigured,
+  isRevisaoSupabaseSubmitActive,
+  revisaoGoogleFormUrl,
+} from '../lib/revisaoSubmitMode';
+import { submitToRevisaoSheet } from '../lib/submitToRevisaoSheet';
+import { submitToSupabaseRevisao } from '../lib/submitToSupabaseRevisao';
+import { isGoogleCredentialForSheetConfigured } from '../lib/googleCredentialForSheet';
+import { GoogleSheetSendAuthBar } from './GoogleSheetSendAuthBar';
+import { RevisaoSupabaseUnavailablePanel } from './RevisaoSupabaseUnavailablePanel';
+import {
+  buildAtualizacaoDeltaPayload,
+  getAtualizacaoSummarySectionsApenasAlteradas,
+  getUpdateFormBaselineFromSolution,
+  mergeAtualizacaoBaselineWithDelta,
+  SubmissionSuccessSummary,
+} from './SubmissionSuccessSummary';
 import type { Solution } from '../types/solution';
 
 type SolutionUpdateFormProps = {
@@ -47,64 +65,212 @@ const CATEGORIA_OPTIONS = [
   'Processo',
 ];
 
+function baselineRecordToFormData(b: Record<string, string>): FormData {
+  return {
+    nomeSolucao: b.nomeSolucao,
+    categoria: b.categoria,
+    responsible: b.responsible,
+    status: b.status as FormData['status'],
+    nivelMaturidade: b.nivelMaturidade as FormData['nivelMaturidade'],
+    oQueE: b.oQueE,
+    quandoUsar: b.quandoUsar,
+    problemaResolvido: b.problemaResolvido,
+    resultadoEsperado: b.resultadoEsperado,
+    impactoPrincipal: b.impactoPrincipal,
+    comoUsar: b.comoUsar,
+    tipoProblema: b.tipoProblema,
+    tipoImpacto: b.tipoImpacto,
+    tags: b.tags,
+    observacoes: b.observacoes,
+    linkAcesso: b.linkAcesso,
+    linkDemo: b.linkDemo,
+    linkDocumentacao: b.linkDocumentacao,
+  };
+}
+
+function formDataToStringRecord(f: FormData): Record<string, string> {
+  return {
+    nomeSolucao: String(f.nomeSolucao),
+    categoria: String(f.categoria),
+    responsible: String(f.responsible),
+    status: String(f.status),
+    nivelMaturidade: String(f.nivelMaturidade),
+    oQueE: String(f.oQueE),
+    quandoUsar: String(f.quandoUsar),
+    problemaResolvido: String(f.problemaResolvido),
+    resultadoEsperado: String(f.resultadoEsperado),
+    impactoPrincipal: String(f.impactoPrincipal),
+    comoUsar: String(f.comoUsar),
+    tipoProblema: String(f.tipoProblema),
+    tipoImpacto: String(f.tipoImpacto),
+    tags: String(f.tags),
+    observacoes: String(f.observacoes),
+    linkAcesso: String(f.linkAcesso),
+    linkDemo: String(f.linkDemo),
+    linkDocumentacao: String(f.linkDocumentacao),
+  };
+}
+
 export function SolutionUpdateForm({ solution, onCancel }: SolutionUpdateFormProps) {
-  const [form, setForm] = useState<FormData>({
-    nomeSolucao: solution.title,
-    categoria: solution.category,
-    responsible: solution.responsible,
-    status: solution.status,
-    nivelMaturidade: 'Médio', // Fallback as it's not in the base Solution type yet
-    oQueE: solution.oQueE,
-    quandoUsar: solution.quandoUsar.join('; '),
-    problemaResolvido: solution.problemSolved || '',
-    resultadoEsperado: solution.resultadoEsperado,
-    impactoPrincipal: solution.impact,
-    comoUsar: solution.comoUsar || '',
-    tipoProblema: solution.problemTypes.join('; '),
-    tipoImpacto: solution.impactTypes.join('; '),
-    tags: solution.tags.join('; '),
-    observacoes: solution.observacoes || '',
-    linkAcesso: solution.link || '',
-    linkDemo: solution.demoLink || '',
-    linkDocumentacao: solution.documentationLink || '',
-  });
+  const [form, setForm] = useState<FormData>(() =>
+    baselineRecordToFormData(getUpdateFormBaselineFromSolution(solution)),
+  );
 
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [failedSupabasePayloadJson, setFailedSupabasePayloadJson] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmittedPayload, setLastSubmittedPayload] = useState<Record<string, unknown> | null>(null);
+  const [lastSubmittedDelta, setLastSubmittedDelta] = useState<Record<string, unknown> | null>(null);
+  const [googleIdToken, setGoogleIdToken] = useState<string | null>(null);
+  const [copyHint, setCopyHint] = useState<string | null>(null);
+
+  const supabaseActive = isRevisaoSupabaseSubmitActive();
+  const appsScriptActive = isRevisaoAppsScriptSubmitActive();
+  const formFallback = isRevisaoFormFallbackConfigured();
+  const formUrl = revisaoGoogleFormUrl();
+  const googleAuthRequired = appsScriptActive && isGoogleCredentialForSheetConfigured();
 
   const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    
-    const payload = {
-      ...form,
-      tipo_solicitacao: 'atualizacao',
-      original_id: solution.id,
-      timestamp: new Date().toISOString(),
-    };
+    setSubmitError(null);
+    setFailedSupabasePayloadJson(null);
 
-    console.log('Payload de atualização:', payload);
+    if (googleAuthRequired && !googleIdToken) {
+      setSubmitError('Use «Continuar com Google» com a conta da empresa antes de enviar à planilha.');
+      return;
+    }
+
+    const currentRecord = formDataToStringRecord(form);
+    const deltaPayload = buildAtualizacaoDeltaPayload(solution, currentRecord);
+    const mergedPayload = mergeAtualizacaoBaselineWithDelta(solution, deltaPayload);
+
+    if (supabaseActive) {
+      setIsSubmitting(true);
+      try {
+        await submitToSupabaseRevisao(deltaPayload);
+        setLastSubmittedPayload(mergedPayload);
+        setLastSubmittedDelta(deltaPayload);
+        setFailedSupabasePayloadJson(null);
+        setSubmitError(null);
+        setSubmitted(true);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Não foi possível enviar o pedido.';
+        setSubmitError(msg);
+        setFailedSupabasePayloadJson(JSON.stringify(deltaPayload, null, 2));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    if (appsScriptActive) {
+      setIsSubmitting(true);
+      try {
+        await submitToRevisaoSheet(deltaPayload, {
+          googleIdToken: googleAuthRequired ? googleIdToken : null,
+        });
+        setLastSubmittedPayload(mergedPayload);
+        setLastSubmittedDelta(deltaPayload);
+        setSubmitted(true);
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Não foi possível enviar o pedido.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    if (formFallback) {
+      setLastSubmittedPayload(mergedPayload);
+      setLastSubmittedDelta(deltaPayload);
+      setSubmitted(true);
+      return;
+    }
+
+    setLastSubmittedPayload(mergedPayload);
+    setLastSubmittedDelta(deltaPayload);
     setSubmitted(true);
+    console.log('Payload de atualização (delta, sem URL Apps Script):', deltaPayload);
   };
 
   if (submitted) {
+    const payloadForDisplay = lastSubmittedPayload ?? {};
+    const payloadText = formFallback
+      ? JSON.stringify(lastSubmittedDelta ?? payloadForDisplay, null, 2)
+      : '';
+
+    const copyPayloadJson = async () => {
+      if (!payloadText) return;
+      try {
+        await navigator.clipboard.writeText(payloadText);
+        setCopyHint('Resumo copiado para a área de transferência.');
+        window.setTimeout(() => setCopyHint(null), 2500);
+      } catch {
+        setCopyHint('Não foi possível copiar automaticamente; selecione o texto abaixo.');
+        window.setTimeout(() => setCopyHint(null), 4000);
+      }
+    };
+
     return (
       <div className="w-full py-8 text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-secondary/10 text-secondary">
           <CheckCircle2 size={40} />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-on-surface">Sugestão enviada!</h2>
-          <p className="text-on-surface-variant max-w-md mx-auto">
-            Obrigado por contribuir. Suas sugestões para <strong>{solution.title}</strong> foram capturadas e serão revisadas pelo time responsável.
+          <h2 className="text-2xl font-bold text-on-surface">
+            {formFallback ? 'Concluir no formulário' : 'Sugestão enviada!'}
+          </h2>
+          <p className="text-on-surface-variant max-w-lg mx-auto leading-relaxed">
+            {formFallback && formUrl ? (
+              <>
+                Envio automático a partir deste site não está disponível pela política de TI. Os dados estão prontos
+                para <strong className="text-on-surface">{solution.title}</strong> — abra o formulário corporativo
+                (sessão Google Arco) e cole o JSON ou preencha os campos.
+              </>
+            ) : supabaseActive || appsScriptActive ? (
+              <>
+                O pedido foi enviado para <strong className="text-on-surface">revisão</strong>, referente a{' '}
+                <strong className="text-on-surface">{solution.title}</strong>. Após validação, as alterações poderão
+                constar no portfólio em breve.
+              </>
+            ) : (
+              <>
+                Modo local — sugestões para <strong>{solution.title}</strong>. Confira o resumo abaixo.
+              </>
+            )}
           </p>
         </div>
-        <div className="pt-4 text-xs text-on-surface-variant font-mono bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 text-left overflow-auto max-h-40">
-          <p className="mb-2 font-bold uppercase tracking-widest text-[10px]">Fluxo em preparação (Payload Log):</p>
-          <pre>{JSON.stringify({ ...form, tipo_solicitacao: 'atualizacao' }, null, 2)}</pre>
-        </div>
+        {formFallback && formUrl ? (
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-2">
+            <a
+              href={formUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex px-8 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+            >
+              Abrir formulário de envio
+            </a>
+            <button
+              type="button"
+              onClick={() => void copyPayloadJson()}
+              className="inline-flex px-6 py-3 rounded-xl border border-outline-variant/30 text-on-surface font-semibold hover:bg-surface-container-high transition-colors"
+            >
+              Copiar resumo (JSON)
+            </button>
+          </div>
+        ) : null}
+        {copyHint ? <p className="text-sm text-secondary">{copyHint}</p> : null}
+        <SubmissionSuccessSummary
+          title="Resumo das alterações enviadas"
+          sections={getAtualizacaoSummarySectionsApenasAlteradas(solution, payloadForDisplay)}
+        />
         <button
           type="button"
           onClick={onCancel}
@@ -140,7 +306,37 @@ export function SolutionUpdateForm({ solution, onCancel }: SolutionUpdateFormPro
         </p>
       </header>
 
-      <form onSubmit={handleSubmit} className="space-y-10">
+      {supabaseActive && failedSupabasePayloadJson ? (
+        <RevisaoSupabaseUnavailablePanel
+          payloadJson={failedSupabasePayloadJson}
+          errorDetail={submitError}
+          onDismiss={() => {
+            setFailedSupabasePayloadJson(null);
+            setSubmitError(null);
+          }}
+        />
+      ) : submitError ? (
+        <div className="rounded-xl border border-tertiary/40 bg-tertiary/10 p-4 text-sm text-on-surface">
+          <p className="font-semibold text-tertiary mb-1">Erro ao enviar o pedido</p>
+          <p>{submitError}</p>
+        </div>
+      ) : null}
+
+      {appsScriptActive ? (
+        <GoogleSheetSendAuthBar googleIdToken={googleIdToken} onGoogleIdToken={setGoogleIdToken} />
+      ) : null}
+
+      {formFallback ? (
+        <div className="rounded-xl border border-primary/25 bg-primary/10 p-4 text-sm text-on-surface">
+          <p className="font-semibold text-on-surface mb-1">Envio via formulário corporativo</p>
+          <p className="text-on-surface-variant leading-relaxed">
+            Após editar, use <strong className="text-on-surface">Enviar sugestão</strong>: o site valida e mostra o
+            link para o formulário Google (política de TI).
+          </p>
+        </div>
+      ) : null}
+
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-10">
         {/* Bloco 1: Informações Gerais */}
         <div className="space-y-6">
           <h3 className="text-lg font-bold text-on-surface flex items-center gap-2 border-b border-outline-variant/20 pb-2">
@@ -349,9 +545,10 @@ export function SolutionUpdateForm({ solution, onCancel }: SolutionUpdateFormPro
         <div className="flex items-center gap-4 pt-4">
           <button
             type="submit"
-            className="flex-grow md:flex-none px-8 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+            disabled={isSubmitting}
+            className="flex-grow md:flex-none px-8 py-3 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Enviar sugestão
+            {isSubmitting ? 'A enviar…' : 'Enviar sugestão'}
           </button>
           <button
             type="button"

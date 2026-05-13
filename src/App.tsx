@@ -35,6 +35,7 @@ import { SolutionUpdateForm } from './components/SolutionUpdateForm';
 import { SolutionsCatalog } from './components/SolutionsCatalog';
 import { TopNavBar } from './components/TopNavBar';
 import { LoginPage } from './components/LoginPage';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const getInitialTheme = (): Theme => {
   const saved = localStorage.getItem('theme');
@@ -615,7 +616,9 @@ export default function App() {
     </div>
   );
 
-  return (
+  const googleOAuthClientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID?.trim() ?? '';
+
+  const appShell = (
     <div className="min-h-screen flex flex-col">
       <AnimatePresence mode="wait">
         {!isAuthenticated ? (
@@ -990,5 +993,13 @@ export default function App() {
         )}
       </AnimatePresence>
     </div>
+  );
+
+  return googleOAuthClientId ? (
+    <GoogleOAuthProvider clientId={googleOAuthClientId} locale="pt-BR">
+      {appShell}
+    </GoogleOAuthProvider>
+  ) : (
+    appShell
   );
 }
