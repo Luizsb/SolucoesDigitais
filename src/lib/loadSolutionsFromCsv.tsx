@@ -228,6 +228,21 @@ function hasSolutionName(row: CsvRow): boolean {
   return Boolean(row.nome_solucao?.trim());
 }
 
+function getUltimaAtualizacaoFromRow(row: CsvRow): string | undefined {
+  const direct = row.ultima_atualizacao?.trim();
+  if (direct) return direct;
+
+  const target = 'ultimaatualizacao';
+  for (const key of Object.keys(row)) {
+    const nk = normalizeText(key).replace(/[\s_]/g, '');
+    if (nk === target) {
+      const v = row[key]?.trim();
+      if (v) return v;
+    }
+  }
+  return undefined;
+}
+
 function mapRowToSolution(row: CsvRow, index: number): Solution {
   const id = row.id?.trim() || `csv-${index + 1}`;
   const title = row.nome_solucao.trim();
@@ -249,6 +264,7 @@ function mapRowToSolution(row: CsvRow, index: number): Solution {
   const link = row.link_acesso?.trim() || undefined;
   const demoLink = row.link_demo?.trim() || undefined;
   const documentationLink = row.link_documentacao?.trim() || undefined;
+  const ultimaAtualizacao = getUltimaAtualizacaoFromRow(row);
   const features = [...tags, ...impactTypes];
   const normalizedFeatures = Array.from(new Set(features));
 
@@ -277,6 +293,7 @@ function mapRowToSolution(row: CsvRow, index: number): Solution {
     link,
     demoLink,
     documentationLink,
+    ultimaAtualizacao,
     features: normalizedFeatures.length > 0 ? normalizedFeatures : fallbackFeatures.length > 0 ? fallbackFeatures : ['Sem tags'],
     imageUrl: visual.imageUrl,
     icon: <Icon size={24} />,

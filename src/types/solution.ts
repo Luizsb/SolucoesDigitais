@@ -25,6 +25,8 @@ export interface Solution {
   link?: string;
   demoLink?: string;
   documentationLink?: string;
+  /** Valor bruto da coluna `ultima_atualizacao` no CSV (data/hora da última revisão da ficha). */
+  ultimaAtualizacao?: string;
   features: string[];
   imageUrl: string;
   icon: ReactNode;

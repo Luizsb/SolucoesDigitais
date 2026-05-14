@@ -83,6 +83,15 @@
   body {
     @apply bg-background text-on-surface font-body antialiased transition-colors duration-300;
   }
+
+  button:not(:disabled):not([aria-disabled='true']),
+  [role='button']:not(:disabled):not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
+  a[href] {
+    cursor: pointer;
+  }
 }
 
 .glass-nav {

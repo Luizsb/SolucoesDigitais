@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { Solution, Theme } from '../types/solution';
 import type { ResponsibleLinksMap } from '../lib/loadSolutionsFromCsv';
+import { formatUltimaAtualizacaoDisplay } from '../lib/formatUltimaAtualizacao';
 import { solutionToMarkdown } from '../lib/solutionExportMarkdown';
 import { ResponsibleNames } from './ResponsibleNames';
 
@@ -53,6 +54,7 @@ export function SolutionModal({
     .split(';')
     .map((item) => item.trim())
     .filter(Boolean);
+  const ultimaAtualizacaoLabel = formatUltimaAtualizacaoDisplay(solution.ultimaAtualizacao);
   const sidebarStatusBadgeClasses = {
     'Em uso':
       'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/30 dark:text-emerald-100 dark:border-emerald-300/50',
@@ -129,7 +131,7 @@ export function SolutionModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 cursor-pointer bg-black/60 backdrop-blur-sm"
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -188,6 +190,16 @@ export function SolutionModal({
                   ))}
                 </div>
               </div>
+              {ultimaAtualizacaoLabel ? (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-label uppercase tracking-wider text-on-surface-variant dark:text-white/70">
+                    Última atualização
+                  </p>
+                  <p className="text-[11px] font-medium tabular-nums text-on-surface dark:text-white/90">
+                    {ultimaAtualizacaoLabel}
+                  </p>
+                </div>
+              ) : null}
             </div>
 
             <button
