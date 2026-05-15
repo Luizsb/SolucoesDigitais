@@ -14,6 +14,13 @@ O portfólio centraliza soluções em uso, em piloto e em desenvolvimento, permi
 
 A fonte de dados atual é uma planilha Google Sheets publicada em CSV, consumida diretamente pelo front-end.
 
+Pedidos de **nova solução** ou **atualização** podem ser gravados em **Supabase** quando as variáveis `VITE_SUPABASE_*` estão definidas (`scripts/README-SUPABASE.md`); a planilha publicada continua a ser a vista «oficial» após revisão manual.
+
+### Documentação de evolução do produto
+
+- [`docs/PLANO-EVOLUCAO.md`](docs/PLANO-EVOLUCAO.md): roadmap vivo, estado das fases e **fluxo para manter o plano atualizado** (alinhar PRs ao doc).
+- Artefacto estratégico complementar na raiz: `1. Plano de Evolução - Portfólio de Soluções Digitais.docx` (ou PDF).
+
 ## Tecnologias usadas
 
 - React 19
