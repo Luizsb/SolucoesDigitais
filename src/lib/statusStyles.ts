@@ -6,4 +6,6 @@ export const STATUS_BADGE_CLASSES: Record<Status, string> = {
   Piloto: 'bg-tertiary/20 text-tertiary border border-tertiary/35 shadow-sm shadow-tertiary/20',
   'Em desenvolvimento':
     'bg-primary/20 text-primary border border-primary/35 shadow-sm shadow-primary/20',
+  Arquivado:
+    'bg-on-surface/10 text-on-surface-variant border border-outline-variant/40 shadow-sm',
 };

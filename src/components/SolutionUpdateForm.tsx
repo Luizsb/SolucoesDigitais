@@ -2,7 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { CheckCircle2, CircleHelp, Edit3, Info, X } from 'lucide-react';
 import {
   SOLUTION_STATUS_OPTION_TITLE,
-  SOLUTION_STATUS_ORDER,
+  SOLUTION_STATUS_ORDER_WITH_ARCHIVED,
 } from '../lib/solutionStatusFormCopy';
 import { StatusFieldLegend } from './StatusFieldLegend';
 import {
@@ -23,7 +23,7 @@ import {
   mergeAtualizacaoBaselineWithDelta,
   SubmissionSuccessSummary,
 } from './SubmissionSuccessSummary';
-import type { Solution } from '../types/solution';
+import type { Solution, Status } from '../types/solution';
 
 type SolutionUpdateFormProps = {
   solution: Solution;
@@ -34,7 +34,7 @@ type FormData = {
   nomeSolucao: string;
   categoria: string;
   responsible: string;
-  status: 'Em uso' | 'Em desenvolvimento' | 'Piloto';
+  status: Status;
   nivelMaturidade: 'Baixo' | 'Médio' | 'Alto';
   oQueE: string;
   quandoUsar: string;
@@ -383,7 +383,7 @@ export function SolutionUpdateForm({ solution, onCancel }: SolutionUpdateFormPro
                 onChange={(e) => updateField('status', e.target.value as FormData['status'])}
                 className="w-full rounded-xl border border-outline-variant/25 bg-surface-container-high px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
-                {SOLUTION_STATUS_ORDER.map((value) => (
+                {SOLUTION_STATUS_ORDER_WITH_ARCHIVED.map((value) => (
                   <option key={value} value={value} title={SOLUTION_STATUS_OPTION_TITLE[value]}>
                     {value}
                   </option>

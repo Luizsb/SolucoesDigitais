@@ -2,7 +2,7 @@ import { CircleHelp } from 'lucide-react';
 import { SOLUTION_STATUS_TOOLTIP } from '../lib/solutionStatusFormCopy';
 
 /**
- * Ícone (?) ao lado de « Status »: resumo dos três estados com cor por nome (bloco único com separadores).
+ * Ícone (?) ao lado de « Status »: resumo dos estados com cor por nome (bloco único com separadores).
  */
 export function StatusFieldLegend() {
   return (

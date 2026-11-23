@@ -145,26 +145,28 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (solutions.length === 0) return;
+    const activeIds = solutions
+      .filter((solution) => solution.status !== 'Arquivado')
+      .map((solution) => solution.id);
+    if (activeIds.length === 0) return;
 
-    const currentIds = solutions.map((solution) => solution.id);
-    const currentIdSet = new Set(currentIds);
+    const currentIdSet = new Set(activeIds);
     const knownIds = JSON.parse(localStorage.getItem(KNOWN_SOLUTIONS_STORAGE_KEY) ?? '[]') as string[];
     const unreadIds = JSON.parse(localStorage.getItem(UNREAD_SOLUTIONS_STORAGE_KEY) ?? '[]') as string[];
 
     const knownIdSet = new Set(knownIds);
     const unreadIdSet = new Set(unreadIds.filter((id) => currentIdSet.has(id)));
 
-    currentIds.forEach((id) => {
+    activeIds.forEach((id) => {
       if (!knownIdSet.has(id)) {
         unreadIdSet.add(id);
       }
     });
 
-    const nextUnreadIds = currentIds.filter((id) => unreadIdSet.has(id));
+    const nextUnreadIds = activeIds.filter((id) => unreadIdSet.has(id));
     setUnreadNotificationIds(nextUnreadIds);
 
-    localStorage.setItem(KNOWN_SOLUTIONS_STORAGE_KEY, JSON.stringify(currentIds));
+    localStorage.setItem(KNOWN_SOLUTIONS_STORAGE_KEY, JSON.stringify(activeIds));
     localStorage.setItem(UNREAD_SOLUTIONS_STORAGE_KEY, JSON.stringify(nextUnreadIds));
   }, [solutions]);
 
@@ -253,10 +255,14 @@ export default function App() {
       .map((item) => item.trim())
       .filter(Boolean);
 
-  const categories = ['Todas', ...new Set(solutions.map((s) => s.category))];
+  const activeSolutions = solutions.filter((s) => s.status !== 'Arquivado');
+  const archivedSolutions = solutions.filter((s) => s.status === 'Arquivado');
+  const catalogSource = activeFilter === 'Arquivado' ? archivedSolutions : activeSolutions;
+
+  const categories = ['Todas', ...new Set(catalogSource.map((s) => s.category))];
   const responsibles = [
     'Todos',
-    ...new Set(solutions.flatMap((s) => splitResponsibles(s.responsible))),
+    ...new Set(catalogSource.flatMap((s) => splitResponsibles(s.responsible))),
   ];
   const hasActiveFilters =
     activeFilter !== 'Todos' ||
@@ -264,8 +270,11 @@ export default function App() {
     responsibleFilter !== 'Todos' ||
     searchQuery.trim() !== '';
 
-  const filteredSolutions = solutions.filter((s) => {
-    const matchesStatus = activeFilter === 'Todos' || s.status === activeFilter;
+  const filteredSolutions = catalogSource.filter((s) => {
+    const matchesStatus =
+      activeFilter === 'Todos' ||
+      activeFilter === 'Arquivado' ||
+      s.status === activeFilter;
     const normalizedQuery = normalizeSearch(searchQuery.trim());
     const searchableText = normalizeSearch(
       [
@@ -308,12 +317,12 @@ export default function App() {
     }
   }, [currentPage, totalPages]);
 
-  const totalSolutions = solutions.length;
-  const emUsoCount = solutions.filter((s) => s.status === 'Em uso').length;
-  const emDesenvolvimentoCount = solutions.filter((s) => s.status === 'Em desenvolvimento').length;
-  const pilotoCount = solutions.filter((s) => s.status === 'Piloto').length;
-  const withDemoCount = solutions.filter((s) => Boolean(s.demoLink)).length;
-  const withoutLinksCount = solutions.filter(
+  const totalSolutions = activeSolutions.length;
+  const emUsoCount = activeSolutions.filter((s) => s.status === 'Em uso').length;
+  const emDesenvolvimentoCount = activeSolutions.filter((s) => s.status === 'Em desenvolvimento').length;
+  const pilotoCount = activeSolutions.filter((s) => s.status === 'Piloto').length;
+  const withDemoCount = activeSolutions.filter((s) => Boolean(s.demoLink)).length;
+  const withoutLinksCount = activeSolutions.filter(
     (s) => !s.link && !s.demoLink && !s.documentationLink,
   ).length;
   const clearFilters = () => {
@@ -386,7 +395,9 @@ export default function App() {
     );
   };
 
-  const unreadNotifications = solutions.filter((solution) => unreadNotificationIds.includes(solution.id));
+  const unreadNotifications = activeSolutions.filter((solution) =>
+    unreadNotificationIds.includes(solution.id),
+  );
 
   const ensureIntroJsLoaded = async (): Promise<boolean> => {
     if (window.introJs) return true;
@@ -515,6 +526,9 @@ export default function App() {
           { id: 'Em uso', label: 'Em uso' },
           { id: 'Em desenvolvimento', label: 'Em desenvolvimento' },
           { id: 'Piloto', label: 'Piloto' },
+          ...(archivedSolutions.length > 0
+            ? [{ id: 'Arquivado', label: `Arquivadas (${archivedSolutions.length})` }]
+            : []),
         ].map((filter) => (
           <button
             key={filter.id}

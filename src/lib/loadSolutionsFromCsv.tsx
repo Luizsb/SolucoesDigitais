@@ -23,6 +23,7 @@ import coverContract from '../assets/covers/contract.svg';
 import coverDash from '../assets/covers/dash.svg';
 import coverGenius from '../assets/covers/genius.svg';
 import coverPdf from '../assets/covers/pdf.svg';
+import { isForcedArchived } from './archivedSolutions';
 import type { Solution, Status } from '../types/solution';
 
 const DEFAULT_CSV_URL =
@@ -211,6 +212,7 @@ function normalizePersonName(value: string): string {
 
 function mapStatus(value: string): Status {
   const raw = normalizeText(value);
+  if (raw.includes('arquiv') || raw.includes('descontinu')) return 'Arquivado';
   if (raw.includes('uso') || raw.includes('produc')) return 'Em uso';
   if (raw.includes('pilot')) return 'Piloto';
   return 'Em desenvolvimento';
@@ -247,7 +249,7 @@ function mapRowToSolution(row: CsvRow, index: number): Solution {
   const id = row.id?.trim() || `csv-${index + 1}`;
   const title = row.nome_solucao.trim();
   const category = row.categoria?.trim() || 'Geral';
-  const status = mapStatus(row.status ?? '');
+  const status = isForcedArchived(id) ? 'Arquivado' : mapStatus(row.status ?? '');
   const responsible = row.responsavel?.trim() || row.area_responsavel?.trim() || 'Não definido';
   const problemSolved = row.problema_resolvido?.trim() || undefined;
   const problemTypes = splitMultiValue(row.tipo_problema ?? '');

@@ -1,7 +1,13 @@
 import type { Status } from '../types/solution';
 
-/** Ordem sugerida no select: evolução → experimentação → adoção. */
+/** Ordem sugerida no select de novas soluções: evolução → experimentação → adoção. */
 export const SOLUTION_STATUS_ORDER: readonly Status[] = ['Em desenvolvimento', 'Piloto', 'Em uso'];
+
+/** Ordem no select de atualização (inclui Arquivado para descontinuar / reativar). */
+export const SOLUTION_STATUS_ORDER_WITH_ARCHIVED: readonly Status[] = [
+  ...SOLUTION_STATUS_ORDER,
+  'Arquivado',
+];
 
 /** Conteúdo do tooltip (?) — textos curtos; nomes com cor para leitura em linha. */
 export const SOLUTION_STATUS_TOOLTIP: readonly {
@@ -28,6 +34,12 @@ export const SOLUTION_STATUS_TOOLTIP: readonly {
     body: 'já no dia a dia da operação.',
     emphasisClass: 'text-emerald-600 dark:text-emerald-400',
   },
+  {
+    key: 'Arquivado',
+    short: 'Arquivado',
+    body: 'descontinuado ou pausado; fora do portfólio ativo.',
+    emphasisClass: 'text-zinc-600 dark:text-zinc-400',
+  },
 ];
 
 /** Tooltip nativo de cada opção na lista suspensa. */
@@ -35,4 +47,5 @@ export const SOLUTION_STATUS_OPTION_TITLE: Record<Status, string> = {
   'Em desenvolvimento': 'Em construção ou evolução; ainda não no dia a dia amplo.',
   Piloto: 'Teste controlado com grupo reduzido antes de expandir o uso.',
   'Em uso': 'Uso recorrente no dia a dia da operação.',
+  Arquivado: 'Descontinuado ou pausado; oculto do portfólio ativo.',
 };

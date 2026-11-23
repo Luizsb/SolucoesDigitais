@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export type Status = 'Em uso' | 'Piloto' | 'Em desenvolvimento';
+export type Status = 'Em uso' | 'Piloto' | 'Em desenvolvimento' | 'Arquivado';
 export type ViewMode = 'grid' | 'list';
 export type Theme = 'light' | 'dark';
 export type Tab = 'dashboard' | 'solutions' | 'submission';

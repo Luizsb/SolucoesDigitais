@@ -62,6 +62,8 @@ export function SolutionModal({
       'bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-500/30 dark:text-amber-100 dark:border-amber-300/50',
     'Em desenvolvimento':
       'bg-sky-100 text-sky-900 border border-sky-300 dark:bg-sky-500/30 dark:text-sky-100 dark:border-sky-300/50',
+    Arquivado:
+      'bg-zinc-100 text-zinc-700 border border-zinc-300 dark:bg-zinc-500/25 dark:text-zinc-200 dark:border-zinc-400/40',
   } as const;
 
   useEffect(() => {
